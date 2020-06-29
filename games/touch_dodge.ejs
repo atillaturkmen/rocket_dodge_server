@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="icon" href="https://omniamorsaequat.com/favicon.ico?id=31">
+    <LINK REL="shortcut icon" HREF="https://omniamorsaequat.com/favicon.ico?id=69" TYPE="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Touch Dodge</title>
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #09daff;
+        }
+
+        canvas {
+            background-color: #09daff;
+        }
+
+        .overlay {
+            position: fixed;
+            display: none;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+
+        .overlay.tutorial {
+            cursor: pointer;
+            display: block;
+        }
+
+        .overlay-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 3vmax;
+            color: white;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body onload="myGameArea.initialize()">
+
+    <div id="tutorial" class="overlay tutorial" onclick="myGameArea.start()" ontouchstart="myGameArea.start()">
+        <div id="tutorialText" class="overlay-text">Avoid the dots, make them collide with each other to gain points.
+            Pause with esc and tap to move around. Press B to toggle dark mode.<br><br>Click anywhere or press spacebar
+            to start</div>
+    </div>
+
+    <div id="pause" class="overlay" onclick="myGameArea.resume()" ontouchstart="myGameArea.resume()">
+        <div id="pauseText" class="overlay-text">Press ESC or tap the screen to resume.</div>
+    </div>
+
+    <div id="gameover" class="overlay" onclick="myGameArea.restart()" ontouchstart="myGameArea.restart()">
+        <div id="gameOverText" class="overlay-text"></div>
+    </div>
+
+    <script>
+        let scores = <%- scores %>;
+        let username = "<%= username %>";
+        // variables below can be changed arbitrarily
+        const fps = 60; // frame number per second
+        const speed = 6; // how many pixels the player moves in one frame
+        const missileSize = 20; // the length of one edge of the square missile in pixels
+        const difficulty = 1; // changes missile speed increse rate
+        const initialMissileInterval = 150; // how often the missiles appear initially in miliseconds
+        const initialMissileSpeed = 2; // how many pixels missiles move in one frame initially
+        const acceleration = true; // player movement is accelerating if this variable is set to true
+        let missileColor = "red"; // color of the components chasing the player
+        let playerColor = "black"; // color of the player
+        let playerHeadColor = "grey"; // color of the player's head
+        let scoreTextColor = "black"; // color of the score text color
+
+        let mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); // true if device is mobile
+        let myGamePiece; // rocket that the player controls
+        let missiles = []; // array which contains hostile missiles
+        let missileInterval;
+        let missileSpeed;
+        let score = 0;
+        let mouseX, mouseY;
+
+        //contains canvas and canvas related methods
+        var myGameArea = {
+            canvas: document.createElement("canvas"), // create the canvas
+            //initialize the canvas
+            initialize: function () {
+                this.started = false; // true if game has started
+                this.ongoing = false; // true if game has started and hasn't ended yet (pausing does not count)
+                this.paused = false; // true if game is paused
+
+                //proccess pressed buttons
+                window.addEventListener('keydown', keyDownHandler, false);
+                window.addEventListener('keyup', keyUpHandler, false);
+                window.addEventListener("mouseup", (e) => {
+                    e.preventDefault();
+                    mouseX = e.pageX;
+                    if (mouseX == 0) {
+                        mouseX = 1;
+                    }
+                    mouseY = e.pageY;
+                    if (mouseY == 0) {
+                        mouseY = 1;
+                    }
+                });
+                window.addEventListener("touchend", (e) => {
+                    e.preventDefault();
+                    mouseX = e.changedTouches[0].pageX;
+                    mouseY = e.changedTouches[0].pageY;
+                });
+                window.addEventListener("visibilitychange", () => {
+                    if (document.hidden) {
+                        myGameArea.pause();
+                    }
+                }, false);
+
+                this.canvas.width = window.innerWidth; // set canvas width to window width
+                this.canvas.height = window.innerHeight; // set canvas height to window height
+
+                this.context = this.canvas.getContext("2d"); // context field provides access to various useful canvas methods
+                document.body.appendChild(this.canvas); // insert canvas into html
+
+                myGamePiece = new player(20, 20, playerColor, playerHeadColor, 225, 225); // initialize player
+                myGamePiece.update();
+                printScore(score);
+            },
+            // start game by starting interval
+            start: function () {
+                if (!this.ongoing) {
+                    this.frameNo = 0; // this value increases with every frame from now on
+                    this.started = true;
+                    this.ongoing = true;
+                    missileInterval = initialMissileInterval;
+                    missileSpeed = initialMissileSpeed;
+                    document.getElementById("tutorial").style.display = "none";
+                    this.interval = new IntervalTimer(updateGameArea, 1000 / fps);
+                    this.scoreCounter = new IntervalTimer(() => { score++ }, 1000); // score increases by one every second
+                }
+            },
+            // pauses the game
+            pause: function () {
+                if (!this.paused && this.ongoing) {
+                    this.paused = true;
+                    document.getElementById("pause").style.display = "block";
+                    this.scoreCounter.pause();
+                    this.interval.pause();
+                }
+            },
+            // resumes the game
+            resume: function () {
+                if (this.paused && this.ongoing) {
+                    this.paused = false;
+                    document.getElementById("pause").style.display = "none";
+                    this.scoreCounter.resume();
+                    this.interval.resume();
+                }
+            },
+            // stops updating the game area
+            gameover: function () {
+                this.ongoing = false;
+                this.interval.pause();
+                this.scoreCounter.pause();
+                post_score(score, mobile);
+                if (scores.length) {
+                    //console.log(scores);
+                    if ((scores.length < 5) || (score > scores[scores.length - 1].score)) {
+                        let user_index = scores.length;
+                        let canBeInScorboard = true;
+                        for (i = 0; i < scores.length; i++) {
+                            if (score > scores[i].score) {
+                                user_index = i;
+                                break;
+                            }
+                            if (username == scores[i].username) {
+                                canBeInScorboard = false;
+                                break;
+                            }
+                        }
+                        for (i = 0; i < scores.length; i++) {
+                            if ((username == scores[i].username) && (score > scores[i].score)) {
+                                scores.splice(i, 1);
+                            }
+                        }
+                        if (canBeInScorboard) {
+                            scores.splice(user_index, 0, { username: username, score: score });
+                        }
+                    }
+                    let platform = "PC";
+                    if (mobile){
+                        platform = "Mobile"
+                    }
+                    document.getElementById("gameover").children[0].innerHTML += `GAME OVER<br><br>Top ${platform} Scores:<br>`;
+                    for (i = 0; i < scores.length; i++) {
+                        document.getElementById("gameover").children[0].innerHTML += (i + 1) + ". " + scores[i].username + ": " + scores[i].score + "<br>";
+                    }
+                    document.getElementById("gameover").children[0].innerHTML += "<br>Your Score: " + score;
+                } else {
+                    document.getElementById("gameover").children[0].innerHTML = "GAME OVER<br>Your Score: " + score;
+                }
+                document.getElementById("gameover").style.display = "block";
+            },
+            // restarts the game
+            restart: function () {
+                if (!this.ongoing) {
+                    document.getElementById("gameover").style.display = "none";
+                    document.getElementById("gameover").children[0].innerHTML = "";
+                    document.getElementById("tutorial").style.display = "block";
+                    score = 0;
+                    missiles.length = 0;
+                    this.initialize();
+                }
+            },
+            // clears canvas
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            },
+        }
+
+        function player(width, height, color, headColor, x, y) {
+            if (mobile) {
+                this.width = width * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920) * 3);
+                this.height = height * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920) * 3);
+            } else {
+                this.width = width * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920));
+                this.height = height * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920));
+            }
+            this.speed = speed;
+            this.color = color;
+            this.headColor = headColor;
+            this.angle = 0; // angle change in one frame in radians
+            this.moveAngle = 0; // angle change in one frame in degrees
+            this.currentAngle = 0; // where the player is facing right now
+            this.x = x;
+            this.y = y;
+            // update component position
+            this.newPos = function () {
+                this.dx = mouseX - this.x; // distance to the mouse in x dimension
+                this.dy = mouseY - this.y; // distance to the mouse in y dimension
+                this.distance = Math.sqrt((this.dx * this.dx) + (this.dy * this.dy)); // distance to the mouse
+                if (acceleration) {
+                    this.speed = this.distance * (speed / 100);
+                }
+                this.x += this.speed * (this.dx / this.distance);
+                this.y += this.speed * (this.dy / this.distance);
+            }
+            // updates newly positioned component on the canvas
+            this.update = function () {
+                let ctx = myGameArea.context;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+            // do not let player leave the screen
+            this.inBounds = function () {
+                if (myGamePiece.x < myGamePiece.height / 2) {
+                    myGamePiece.speed = 0;
+                    myGamePiece.x += 1;
+                }
+                if (myGamePiece.x > myGameArea.canvas.width - myGamePiece.height / 2) {
+                    myGamePiece.speed = 0;
+                    myGamePiece.x -= 1;
+                }
+                if (myGamePiece.y < myGamePiece.height / 2) {
+                    myGamePiece.speed = 0;
+                    myGamePiece.y += 1;
+                }
+                if (myGamePiece.y > myGameArea.canvas.height - myGamePiece.height / 2) {
+                    myGamePiece.speed = 0;
+                    myGamePiece.y -= 1;
+                }
+            }
+            // check if this object crashes with other object
+            this.crashWith = function (otherobj) {
+                var myleft = this.x;
+                var myright = this.x + (this.width);
+                var mytop = this.y;
+                var mybottom = this.y + (this.height);
+                var otherleft = otherobj.x;
+                var otherright = otherobj.x + (otherobj.width);
+                var othertop = otherobj.y;
+                var otherbottom = otherobj.y + (otherobj.height);
+                var crash = true;
+                if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+                    crash = false;
+                }
+                return crash;
+            }
+        }
+
+        function missile(width, height, color, x, y, speed) {
+            if (mobile) {
+                this.width = width * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920) * 3);
+                this.height = height * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920) * 3);
+            } else {
+                this.width = width * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920));
+                this.height = height * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920));
+            }
+            this.speed = speed;
+            this.color = color;
+            this.angle = 0;
+            this.moveAngle = 0;
+            this.currentAngle = 0;
+            this.x = x;
+            this.y = y;
+            // updates component position
+            this.newPos = function () {
+                this.dx = myGamePiece.x - this.x; // distance to the player in x dimension
+                this.dy = myGamePiece.y - this.y; // distance to the player in y dimension
+                this.distance = Math.sqrt((this.dx * this.dx) + (this.dy * this.dy)); // distance to the player
+                // coordinate assigments below keep the missile on the path between itself and the player
+                this.x += this.speed * (this.dx / this.distance);
+                this.y += this.speed * (this.dy / this.distance);
+            }
+            // updates newly positioned component on the canvas
+            this.update = function () {
+                let ctx = myGameArea.context;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+            // this method checks if this object crashes with other object
+            this.crashWith = function (otherobj) {
+                var myleft = this.x;
+                var myright = this.x + (this.width);
+                var mytop = this.y;
+                var mybottom = this.y + (this.height);
+                var otherleft = otherobj.x;
+                var otherright = otherobj.x + (otherobj.width);
+                var othertop = otherobj.y;
+                var otherbottom = otherobj.y + (otherobj.height);
+                var crash = true;
+                if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+                    crash = false;
+                }
+                return crash;
+            }
+        }
+
+        // this method updates the game area, is called every frame
+        function updateGameArea() {
+            myGameArea.frameNo++;
+            // check if player collides with one of missiles
+            for (i = 0; i < missiles.length; i++) {
+                if (myGamePiece.crashWith(missiles[i])) {
+                    myGameArea.gameover();
+                    return;
+                }
+                for (j = 0; j < missiles.length; j++) {
+                    if (i != j && missiles[i].crashWith(missiles[j])) {
+                        missiles.splice(i, 1);
+                        missiles.splice(j - 1, 1);
+                        score += 10;
+                    }
+                }
+            }
+            // clear last frame
+            myGameArea.clear();
+            // resize the canvas if window size has changed
+            if ((window.innerWidth != myGameArea.canvas.width) || (window.innerHeight != myGameArea.canvas.height)) {
+                myGameArea.canvas.width = window.innerWidth;
+                myGameArea.canvas.height = window.innerHeight;
+            }
+            // create new hostile missile every missileInterval frames
+            if ((myGameArea.frameNo / missileInterval) % 1 == 0) {
+                let x;
+                let y;
+                if (Math.random() < 0.5) {
+                    x = Math.random() * (-100);
+                } else {
+                    x = myGameArea.canvas.width + Math.random() * 100;
+                }
+                if (Math.random() < 0.5) {
+                    y = Math.random() * (-100);
+                } else {
+                    y = myGameArea.canvas.height + Math.random() * 100;
+                }
+                missiles.push(new missile(missileSize, missileSize, missileColor, x, y, missileSpeed));
+                missileSpeed += (difficulty / missileSpeed);
+                missileInterval -= Math.round(missileInterval / 50);
+            }
+            for (i = 0; i < missiles.length; i++) {
+                missiles[i].newPos();
+                missiles[i].update();
+            }
+            if (mouseX && mouseY) {
+                myGamePiece.newPos();
+            }
+            myGamePiece.inBounds();
+            myGamePiece.update();
+            printScore(score);
+        }
+
+        function post_score(score, is_mobile = false) {
+            let http = new XMLHttpRequest();
+            let scorePostData = { game_type: "touch_dodge", score: score, is_mobile: is_mobile };
+            http.open("POST", "/score", true);
+            http.setRequestHeader('Content-type', 'application/json');
+            http.send(JSON.stringify(scorePostData));
+        }
+
+        // prints the score on canvas
+        function printScore(score) {
+            let ctx = myGameArea.context;
+            ctx.font = "30px Arial";
+            ctx.fillStyle = scoreTextColor;
+            ctx.fillText("Score: " + score, 10, 50);
+        }
+
+        // this object creates pauseable intervals
+        function IntervalTimer(callback, interval) {
+            var timerId, startTime, remaining = 0;
+            var state = 0; //  0 = idle, 1 = running, 2 = paused, 3= resumed
+
+            this.pause = function () {
+                if (state != 1) return;
+
+                remaining = interval - (new Date() - startTime);
+                window.clearInterval(timerId);
+                state = 2;
+            };
+
+            this.resume = function () {
+                if (state != 2) return;
+
+                state = 3;
+                window.setTimeout(this.timeoutCallback, remaining);
+            };
+
+            this.timeoutCallback = function () {
+                if (state != 3) return;
+
+                callback();
+
+                startTime = new Date();
+                timerId = window.setInterval(callback, interval);
+                state = 1;
+            };
+
+            startTime = new Date();
+            timerId = window.setInterval(callback, interval);
+            state = 1;
+        }
+
+        function keyDownHandler(event) {
+            if (event.key == "ArrowRight" || event.key == "d") {
+                event.preventDefault();
+                rightPressed = true;
+            }
+            if (event.key == "ArrowLeft" || event.key == "a") {
+                event.preventDefault();
+                leftPressed = true;
+            }
+            if (event.key == "ArrowDown" || event.key == "s") {
+                event.preventDefault();
+                downPressed = true;
+            }
+            if (event.key == "ArrowUp" || event.key == "w") {
+                event.preventDefault();
+                upPressed = true;
+            }
+            if (event.key == "Escape") {
+                event.preventDefault();
+                if (myGameArea.paused) {
+                    myGameArea.resume();
+                }
+                else {
+                    myGameArea.pause();
+                }
+            }
+            if (event.code == "Space") {
+                event.preventDefault();
+                if (!myGameArea.started) {
+                    myGameArea.start();
+                }
+                else {
+                    myGameArea.restart();
+                }
+            }
+            //toggle dark mode
+            if (event.key == "b") {
+                event.preventDefault();
+                let backgroundColor, textColor;
+                if (!myGameArea.dark) {
+                    myGameArea.dark = true;
+                    missileColor = "#998FC7";
+                    playerColor = "#E0DBE7";
+                    playerHeadColor = "#5FC5D1";
+                    scoreTextColor = "#E0E1DD";
+                    backgroundColor = "#0D1821";
+                    textColor = "#E0E1DD";
+                }
+                else {
+                    myGameArea.dark = false;
+                    missileColor = "red";
+                    playerColor = "black";
+                    playerHeadColor = "grey";
+                    scoreTextColor = "black";
+                    backgroundColor = "#09daff";
+                    textColor = "white";
+                }
+                // set background color
+                document.body.style.backgroundColor = backgroundColor;
+                document.getElementsByTagName("canvas")[0].style.backgroundColor = backgroundColor;
+                // change the color of all text elements
+                let overlayText = document.getElementsByClassName("overlay-text");
+                for (i = 0; i < overlayText.length; i++) {
+                    overlayText[i].style.color = textColor;
+                }
+                // change the color of missiles
+                for (i = 0; i < missiles.length; i++) {
+                    missiles[i].color = missileColor;
+                    missiles[i].update();
+                }
+                // set color of the player
+                myGamePiece.color = playerColor;
+                myGamePiece.headColor = playerHeadColor;
+                myGamePiece.update();
+                printScore(score);
+            }
+        }
+
+        function keyUpHandler(event) {
+            if (event.key == "ArrowRight" || event.key == "d") {
+                rightPressed = false;
+            }
+            if (event.key == "ArrowLeft" || event.key == "a") {
+                leftPressed = false;
+            }
+            if (event.key == "ArrowDown" || event.key == "s") {
+                downPressed = false;
+            }
+            if (event.key == "ArrowUp" || event.key == "w") {
+                upPressed = false;
+            }
+        }
+    </script>
+
+</body>
+
+</html>

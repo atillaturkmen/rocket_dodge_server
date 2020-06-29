@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<%- include('header'); -%>
+
+<head>
+    <title>Delete Account</title>
+    <link rel="stylesheet" href="public/register-form.css">
+</head>
+
+<body>
+    <%- include('navbar'); -%>
+    <br>
+    <form action="/delete" method="POST" class="login-form text-center">
+        <input type="password" name="password" placeholder="Enter Password" autocomplete="off" required>
+        <button type="submit" class="text-center">Delete account</button>
+    </form>
+</body>
+
+</html>

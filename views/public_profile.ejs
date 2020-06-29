@@ -1,0 +1,38 @@
+<!--- omniamorsaequat.com --->
+<!--- https://github.com/DBC201/rocket_dodge_server --->
+<!DOCTYPE html>
+<html>
+
+<%- include('header'); -%>
+
+<head>
+        <title><%= username %></title>
+</head>
+
+<body>
+        <%- include('navbar'); -%>
+        <div class="container">
+                <br>
+                <h2><%= username%>'s High Scores</h2>
+                <br>
+                <table class="table">
+                        <thead>
+                                <tr>
+                                        <th scope="col">Game</th>
+                                        <th scope="col">PC</th>
+                                        <th scope="col">Mobile</th>
+                                </tr>
+                        </thead>
+                        <% for (var i = 0; i < score_table.length; i++) { %>
+                        <tr>
+                                <td scope="row"><a href = "/high_scores/<%= score_table[i][0] %>"><%= score_table[i][0] %></a></td>
+                                <% for (var j = 1; j < score_table.length; j++) { %>
+                                <td><%= score_table[i][j] %></td>
+                                <% } %>
+                        </tr>
+                        <% } %>
+                </table>
+        </div>
+</body>
+
+</html>

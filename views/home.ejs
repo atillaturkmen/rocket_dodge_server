@@ -1,0 +1,32 @@
+<!--- omniamorsaequat.com --->
+<!--- https://github.com/DBC201/rocket_dodge_server --->
+<!DOCTYPE html>
+<html>
+
+<%- include('header'); -%>
+
+<head>
+	<title>Homepage</title>
+</head>
+
+<body>
+	<%- include('navbar'); -%>
+	<div class="container-fluid">
+		<br>
+		<%if (!is_mobile) { %>
+		<a href="/rocket_dodge">Rocket Dodge</a>
+		<br>
+		<br>
+		<% } %>
+		<a href="/hold_dodge">Hold Dodge</a>
+		<br>
+		<br>
+		<a href="/hold_dodge_accelerated">Hold Dodge (Accelerated)</a>
+		<br>
+		<br>
+		<a href="/touch_dodge">Touch Dodge</a>
+		<br>
+	</div>
+</body>
+
+</html>

@@ -1,0 +1,16 @@
+<nav class="navbar navbar-light bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand text-white" href="/">Home</a>
+
+        <div class="navbar" id="navbar">
+            <a class="nav-link text-white" href="/about">About the server</a>
+            <a class="nav-link text-white" href="/downloads">Downloads</a>
+            <a class="nav-link text-white" href="/high_scores">High Scores</a>
+            <%if (!loggedin) { %>
+            <a class="nav-link text-white" href="/login">Login-Register</a>
+            <% }else{ %>
+            <a class="nav-link text-white" href="/profile">View Profile</a>
+            <% } %>
+        </div>
+    </div>
+</nav>

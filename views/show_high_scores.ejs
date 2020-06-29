@@ -1,0 +1,53 @@
+<!--- omniamorsaequat.com --->
+<!--- https://github.com/DBC201/rocket_dodge_server --->
+<!DOCTYPE html>
+<html>
+
+<%- include('header'); -%>
+
+<head>
+        <title>High Scores</title>
+</head>
+
+<body>
+        <%- include('navbar'); -%>
+        <div class="container">
+                <br>
+                <h2>Top High Scores for <a href="/<%=game_type%>"><%= game_type %></a></h2>
+                <br>
+                <table class="table">
+                        <thead>
+                                <tr>
+                                        <th scope="col">Username</th>
+                                        <th scope="col">Pc Score</th>
+                                </tr>
+                        </thead>
+                        <% for (var i = 0; i < pc_scores.length; i++) { %>
+                        <tr>
+                                <td><a href = "/profile/<%= pc_scores[i].username %>"><%= pc_scores[i].username %></a></td>
+                                <td><%= pc_scores[i].score %></td>
+                        </tr>
+                        <% } %>
+                </table>
+                <br>
+                <br>
+                <% if (game_type != "rocket_dodge"){ %>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Username</th>
+                            <th scope="col">Mobile Score</th>
+                        </tr>
+                    </thead>
+                    <% for (var i = 0; i < mobile_scores.length; i++) { %>
+                    <tr>
+                            <td><a href = "/profile/<%= mobile_scores[i].username %>"><%= mobile_scores[i].username %></a></td>
+                            <td><%= mobile_scores[i].score %></td>
+                    </tr>
+                    <% } %>
+                <% } %>
+            </table>
+        </div>
+</body>
+
+</html>
