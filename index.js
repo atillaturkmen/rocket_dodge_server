@@ -86,7 +86,7 @@ app.get("/favicon.ico", function (req, res) {
 
 app.get("/rocket_dodge", function (req, res) {
 	if (req.useragent.isMobile) {
-		res.render("message",{
+		res.render("message", {
 			loggedin: req.session.loggedin,
 			message: "Sorry, this game isn't availible on mobile platforms!"
 		});
@@ -247,7 +247,7 @@ app.get("/profile/:username", function (req, res) {
 				});
 			}
 		} else {
-			res.render("message",{
+			res.render("message", {
 				loggedin: req.session.loggedin,
 				message: "Wrong username!"
 			});
@@ -282,7 +282,7 @@ app.get("/high_scores/:game_type", async (req, res) => {
 			});
 		});
 	} else {
-		res.render("message",{
+		res.render("message", {
 			loggedin: req.session.loggedin,
 			message: "That game doesn't exist!"
 		});
@@ -329,7 +329,7 @@ app.get("/change_password", function (req, res) {
 
 app.get('/register', function (req, res) {
 	if (req.session.loggedin) {
-		res.render("message",{
+		res.render("message", {
 			loggedin: req.session.loggedin,
 			message: "Logout to view this page!"
 		});
@@ -342,7 +342,7 @@ app.get('/register', function (req, res) {
 
 app.get('/login', function (req, res) {
 	if (req.session.loggedin) {
-		res.render("message",{
+		res.render("message", {
 			loggedin: req.session.loggedin,
 			message: "Logout to view this page!"
 		});
@@ -387,12 +387,12 @@ app.post("/delete", function (req, res) {
 					});
 				}
 				req.session.destroy();
-				res.render("message",{
+				res.render("message", {
 					loggedin: false,
 					message: "Account succesfully deleted!"
 				});
 			} else {
-				res.render("message",{
+				res.render("message", {
 					loggedin: req.session.loggedin,
 					message: "Wrong password!"
 				});
@@ -478,20 +478,20 @@ app.post('/auth', async (req, res) => {
 					req.session.username = username_input;
 					res.redirect("/profile");
 				} else {
-					res.render("message",{
+					res.render("message", {
 						loggedin: req.session.loggedin,
 						message: "Wrong password!"
 					});
 				}
 			} else {
-				res.render("message",{
+				res.render("message", {
 					loggedin: req.session.loggedin,
 					message: "Wrong username!"
 				});
 			}
 		});
 	} else {
-		res.render("message",{
+		res.render("message", {
 			loggedin: req.session.loggedin,
 			message: "Please enter a username!"
 		});
@@ -503,7 +503,7 @@ app.post('/signup', async (req, res) => {
 	let username_input = req.body.username;
 	let invalid_input = crediential_response(username_input, password_input);
 	if (invalid_input) {
-		res.render("message",{
+		res.render("message", {
 			loggedin: req.session.loggedin,
 			message: invalid_input
 		});
@@ -513,7 +513,7 @@ app.post('/signup', async (req, res) => {
 			let hashedpassword = await bcrypt.hash(password_input, salt);
 			database.get('SELECT * FROM accounts WHERE username = ?', username_input, function (error, result) {
 				if (result) {
-					res.render("message",{
+					res.render("message", {
 						loggedin: req.session.loggedin,
 						message: "That username is taken, try again."
 					});
@@ -536,13 +536,15 @@ app.post('/signup', async (req, res) => {
 app.post("/update_password", async (req, res) => {
 	if (req.session.loggedin) {
 		if (req.body.new_password != req.body.confirm_new_password) {
-			res.render("message",{
+			res.render("message", {
 				loggedin: req.session.loggedin,
 				message: "Passwords don't match!"
 			});
 		} else if (crediential_response(req.session.username, req.body.new_password)) {
-			res.send(crediential_response(req.session.username, req.body.new_password));
-			res.end();
+			res.render("message", {
+				loggedin: req.session.loggedin,
+				message: crediential_response(req.session.username, req.body.new_password)
+			});
 		} else {
 			database.get("SELECT password FROM ACCOUNTS WHERE username = ?", [req.session.username], async (err, row) => {
 				if (err) {
@@ -556,12 +558,12 @@ app.post("/update_password", async (req, res) => {
 					database.run(update_query, [hashedpassword, req.session.username], function (err) {
 						console.log(err);
 					});
-					res.render("message",{
+					res.render("message", {
 						loggedin: req.session.loggedin,
 						message: "Password updated succesfully!"
 					});
 				} else {
-					res.render("message",{
+					res.render("message", {
 						loggedin: req.session.loggedin,
 						message: "Wrong password!"
 					});
