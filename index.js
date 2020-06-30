@@ -388,7 +388,7 @@ app.post("/delete", function (req, res) {
 				}
 				req.session.destroy();
 				res.render("message",{
-					loggedin: req.session.loggedin,
+					loggedin: false,
 					message: "Account succesfully deleted!"
 				});
 			} else {
