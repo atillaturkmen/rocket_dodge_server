@@ -101,8 +101,8 @@
                 this.paused = false; // true if game is paused
 
                 //proccess pressed buttons
-                //window.addEventListener('keydown', keyDownHandler, false);
-                //window.addEventListener('keyup', keyUpHandler, false);
+                window.addEventListener('keydown', keyDownHandler, false);
+                window.addEventListener('keyup', keyUpHandler, false);
                 window.addEventListener('mousemove', function (e) {
                     e.preventDefault();
                     mouseX = e.pageX;
