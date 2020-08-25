@@ -15,7 +15,6 @@ const https_port = process.env.https_port;
 const http_port = process.env.http_port;
 const http = require("http");
 const https = require('https');
-const { json } = require('body-parser');
 const privateKey = fs.readFileSync(process.env.private_key_dir, 'utf8');
 const certificate = fs.readFileSync(process.env.certificate_dir, 'utf8');
 
@@ -261,25 +260,42 @@ app.get("/high_scores", function (req, res) {
 	});
 });
 
-app.get("/high_scores/:game_type", async (req, res) => {
+app.get("/high_scores/:game_type", function (req, res) {
 	if (game_list.includes(req.params.game_type)) {
 		let pc_scores = [];
 		let mobile_scores = [];
-		database.all(`SELECT username, pc_score AS score FROM ${req.params.game_type} WHERE pc_score IS NOT NULL ORDER BY pc_score DESC LIMIT 5`, async (err, result) => {
-			for (let i = 0; i < result.length; i++) {
-				await pc_scores.push({ username: result[i].username, score: result[i].score });
-			}
-			database.all(`SELECT username, mobile_score AS score FROM ${req.params.game_type} WHERE mobile_score IS NOT NULL ORDER BY mobile_score DESC LIMIT 5`, async (err, result) => {
+		database.all(`SELECT username, pc_score AS score FROM ${req.params.game_type} WHERE pc_score IS NOT NULL ORDER BY pc_score DESC LIMIT 5`, function (err, result) {
+			if (result) {
 				for (let i = 0; i < result.length; i++) {
-					await mobile_scores.push({ username: result[i].username, score: result[i].score });
+					pc_scores.push({
+						username: result[i].username,
+						score: result[i].score
+					});
 				}
-				res.render("show_high_scores", {
+				database.all(`SELECT username, mobile_score AS score FROM ${req.params.game_type} WHERE mobile_score IS NOT NULL ORDER BY mobile_score DESC LIMIT 5`, function (err, result) {
+					for (let i = 0; i < result.length; i++) {
+						mobile_scores.push({
+							username: result[i].username,
+							score: result[i].score
+						});
+					}
+					res.render("show_high_scores", {
+						loggedin: req.session.loggedin,
+						pc_scores: pc_scores,
+						mobile_scores: mobile_scores,
+						game_type: req.params.game_type,
+					});
+				});
+			} else {
+				// if there are no rows, result is undefined, and the above if condition won't run 
+				//if there is no pc score, an empty list is returned, hence the above if condition runs
+				res.render("show_high_scores", { // if there is no rows, there is no score for either platform types
 					loggedin: req.session.loggedin,
-					pc_scores: pc_scores,
-					mobile_scores: mobile_scores,
+					pc_scores: [],
+					mobile_scores: [],
 					game_type: req.params.game_type,
 				});
-			});
+			}
 		});
 	} else {
 		res.render("message", {
