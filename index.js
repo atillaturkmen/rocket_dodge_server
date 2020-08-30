@@ -596,7 +596,9 @@ function crediential_response(username, password) {
 	let min_namelength = 6;
 	let max_password = 37;
 	let min_password = 8;
-	if (username.length < min_namelength) {
+	if (username.indexOf(' ') != -1) {
+		return "You can't have spaces in your username!";
+	} else if (username.length < min_namelength) {
 		return `Username must be at least ${min_namelength} characters!`;
 	} else if (username.length > max_namelength) {
 		return `Username can't be longer than ${max_namelength} characters!`;
