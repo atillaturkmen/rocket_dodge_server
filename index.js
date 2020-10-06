@@ -28,8 +28,6 @@ let credentials = {
 
 const game_list = ["rocket_dodge", "hold_dodge", "hold_dodge_accelerated", "touch_dodge"];
 
-const admin_list = read_admin_file();
-
 let database = new sqlite3.Database(process.env.database_dir, (error) => {
 	if (error) {
 		return console.error(error.message);
@@ -658,23 +656,6 @@ function crediential_response(username, password) {
 	} else {
 		return false;
 	}
-}
-
-function read_admin_file(file_name = "admins.txt") {
-	let admin_array = [];
-	try {
-		let lineReader = require('readline').createInterface({
-			input: require('fs').createReadStream(file_name)
-		});
-
-		lineReader.on('line', function (line) {
-			admin_array.push(line.trim());
-		});
-	} catch (e) {
-		console.log(e);
-		console.log(`Unable to read admins from ${file_name}`);
-	}
-	return admin_array;
 }
 
 function return_time() {
