@@ -316,7 +316,7 @@ app.get("/high_scores/:game_type", function (req, res) {
 
 app.get("/downloads", function (req, res) {
 	if (req.session.loggedin) {
-		res.render("message"{
+		res.render("message", {
 			loggedin: req.session.loggedin,
 			message: "Downloads currently unavailible"
 		});
@@ -393,7 +393,7 @@ app.get('/logout', function (req, res) {
 				// key value pairs of cookies are seperated with '='
 				let ar2 = arr[i].split("=");
 				// remember me cookie's selector starts with 'rem'
-				if (ar2[0].substring(0,3) == "rem") {
+				if (ar2[0].substring(0, 3) == "rem") {
 					selector = ar2[0];
 					res.clearCookie(selector);
 					database.run("DELETE FROM auth_tokens WHERE selector = ?", [selector], function (err) {
@@ -662,11 +662,11 @@ function crediential_response(username, password) {
 
 function read_admin_file(file_name = "admins.txt") {
 	let admin_array = [];
-	try{
+	try {
 		let lineReader = require('readline').createInterface({
 			input: require('fs').createReadStream(file_name)
 		});
-	
+
 		lineReader.on('line', function (line) {
 			admin_array.push(line.trim());
 		});
@@ -696,10 +696,10 @@ function connection_log(text = "Connection from:", ip = '', time = '') {
 	});
 }
 
-function randomString (len) {
+function randomString(len) {
 	var buf = [],
-	  chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
-	  charlen = chars.length;
+		chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+		charlen = chars.length;
 
 	function getRandomInt(min, max) {
 		min = Math.ceil(min);
@@ -708,14 +708,14 @@ function randomString (len) {
 	}
 
 	for (var i = 0; i < len; ++i) {
-	  buf.push(chars[getRandomInt(0, charlen - 1)]);
+		buf.push(chars[getRandomInt(0, charlen - 1)]);
 	}
 
 	return buf.join('');
 }
 
 // ilk kez remember me kutucuğu işaretlenirse bu fonksiyon çalışır
-async function firstRememberMe (req, res) {
+async function firstRememberMe(req, res) {
 	let selector = "rem" + randomString(9);
 	let validator = randomString(64);
 	res.cookie(selector, validator, { maxAge: 2592000000, httpOnly: true });
@@ -726,7 +726,7 @@ async function firstRememberMe (req, res) {
 	let date = new Date();
 	date.setTime(date.getTime() + (2592000000));
 	var expiry = date.toISOString();
-	
+
 	database.get("INSERT INTO auth_tokens(selector, hashedValidator, username, expires) VALUES(?, ?, ?, ?)", [selector, hashedValidator, req.session.username, expiry], function (err) {
 		if (err) {
 			console.log(err);
@@ -735,7 +735,7 @@ async function firstRememberMe (req, res) {
 }
 
 // Checks if user has a remember me cookie
-function checkCookie (req, res, next) {
+function checkCookie(req, res, next) {
 	let loggedin = false;
 	let cookies = req.headers.cookie;
 	if (cookies) {
@@ -746,7 +746,7 @@ function checkCookie (req, res, next) {
 			// key value pairs of cookies are seperated with '='
 			let ar2 = arr[i].split("=");
 			// remember me cookie's selector starts with 'rem'
-			if (ar2[0].substring(0,3) == "rem") {
+			if (ar2[0].substring(0, 3) == "rem") {
 				selector = ar2[0];
 				validator = ar2[1];
 				break;
