@@ -21,7 +21,7 @@ const certificate = fs.readFileSync(process.env.certificate_dir, 'utf8');
 const redisClient = redis.createClient();
 const RedisStore = require('connect-redis')(session);
 
-var credentials = {
+let credentials = {
 	key: privateKey,
 	cert: certificate
 };
@@ -316,9 +316,13 @@ app.get("/high_scores/:game_type", function (req, res) {
 
 app.get("/downloads", function (req, res) {
 	if (req.session.loggedin) {
-		res.render("downloads", {
-			loggedin: req.session.loggedin
+		res.render("message"{
+			loggedin: req.session.loggedin,
+			message: "Downloads currently unavailible"
 		});
+		/*res.render("downloads", {
+			loggedin: req.session.loggedin
+		});*/
 	} else {
 		res.redirect("/login");
 	}
@@ -656,14 +660,20 @@ function crediential_response(username, password) {
 	}
 }
 
-function read_admin_file(admin_array = [], file_name = "admins.txt") {
-	let lineReader = require('readline').createInterface({
-		input: require('fs').createReadStream(file_name)
-	});
-
-	lineReader.on('line', function (line) {
-		admin_array.push(line.trim());
-	});
+function read_admin_file(file_name = "admins.txt") {
+	let admin_array = [];
+	try{
+		let lineReader = require('readline').createInterface({
+			input: require('fs').createReadStream(file_name)
+		});
+	
+		lineReader.on('line', function (line) {
+			admin_array.push(line.trim());
+		});
+	} catch (e) {
+		console.log(e);
+		console.log(`Unable to read admins from ${file_name}`);
+	}
 	return admin_array;
 }
 
