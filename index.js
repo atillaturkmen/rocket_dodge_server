@@ -70,10 +70,19 @@ const https_server = https.createServer(credentials, app).listen(https_port, fun
 });
 
 app.get("/", function (req, res) {
-	res.render("home", {
-		loggedin: req.session.loggedin,
-		is_mobile: req.useragent.isMobile,
-	});
+	if (req.session.loggedin) {
+		res.render("home", {
+			loggedin: req.session.loggedin,
+			is_mobile: req.useragent.isMobile,
+		});
+	} else {
+		checkCookie(req, res, async () => {
+			res.render("home", {
+				loggedin: req.session.loggedin,
+				is_mobile: req.useragent.isMobile,
+			});
+		});
+	}
 	let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null);
 	let current_time = return_time();
 	console.log(current_time + " : Connection from " + ip);
@@ -87,7 +96,7 @@ app.get("/rocket_dodge", function (req, res) {
 	if (req.useragent.isMobile) {
 		res.render("message", {
 			loggedin: req.session.loggedin,
-			message: "Sorry, this game isn't availible on mobile platforms!"
+			message: "Sorry, this game isn't available on mobile platforms!"
 		});
 	} else {
 		let username = req.session.username;
@@ -372,6 +381,25 @@ app.get('/login', function (req, res) {
 app.get('/logout', function (req, res) {
 	if (req.session.loggedin) {
 		req.session.destroy();
+		let cookies = req.headers.cookie;
+		if (cookies) {
+			let arr = cookies.split('; ');
+			// find remember me cookie from all cookies
+			for (let i in arr) {
+				// key value pairs of cookies are seperated with '='
+				let ar2 = arr[i].split("=");
+				// remember me cookie's selector starts with 'rem'
+				if (ar2[0].substring(0,3) == "rem") {
+					selector = ar2[0];
+					res.clearCookie(selector);
+					database.run("DELETE FROM auth_tokens WHERE selector = ?", [selector], function (err) {
+						if (err) {
+							console.log(err);
+						}
+					});
+				}
+			}
+		}
 	}
 	res.redirect("/");
 });
@@ -402,7 +430,20 @@ app.post("/delete", function (req, res) {
 						console.log(err);
 					});
 				}
+				database.run("DELETE FROM auth_tokens WHERE username = ?", [req.session.username], function (err) {
+					if (err) {
+						console.log(err);
+					}
+				});
 				req.session.destroy();
+				let cookies = req.headers.cookie;
+				if (cookies) {
+					let arr = cookies.split('; ');
+					for (let i in arr) {
+						let ar2 = arr[i].split("=");
+						res.clearCookie(ar2[0]);
+					}
+				}
 				res.render("message", {
 					loggedin: false,
 					message: "Account succesfully deleted!"
@@ -485,6 +526,7 @@ app.post("/score", function (req, res) {
 
 app.post('/auth', async (req, res) => {
 	let username_input = req.body.omniamorsaequat_username;
+	let rememberMe = req.body.rememberMe;
 	if (username_input) {
 		database.get('SELECT password FROM accounts WHERE username = ?', username_input, async (error, result) => {
 			if (result) {
@@ -492,6 +534,9 @@ app.post('/auth', async (req, res) => {
 				if (pass_check) {
 					req.session.loggedin = true;
 					req.session.username = username_input;
+					if (rememberMe) {
+						firstRememberMe(req, res);
+					}
 					res.redirect("/profile");
 				} else {
 					res.render("message", {
@@ -639,4 +684,79 @@ function connection_log(text = "Connection from:", ip = '', time = '') {
 	fs.appendFile(file_name, `${time} : ${text} ${ip}\n`, () => {
 		console.log(`Saved to ${file_name}`);
 	});
+}
+
+function randomString (len) {
+	var buf = [],
+	  chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+	  charlen = chars.length;
+
+	function getRandomInt(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+	for (var i = 0; i < len; ++i) {
+	  buf.push(chars[getRandomInt(0, charlen - 1)]);
+	}
+
+	return buf.join('');
+}
+
+// ilk kez remember me kutucuğu işaretlenirse bu fonksiyon çalışır
+async function firstRememberMe (req, res) {
+	let selector = "rem" + randomString(9);
+	let validator = randomString(64);
+	res.cookie(selector, validator, { maxAge: 2592000000, httpOnly: true });
+
+	let salt = await bcrypt.genSalt();
+	let hashedValidator = await bcrypt.hash(validator, salt);
+
+	let date = new Date();
+	date.setTime(date.getTime() + (2592000000));
+	var expiry = date.toISOString();
+	
+	database.get("INSERT INTO auth_tokens(selector, hashedValidator, username, expires) VALUES(?, ?, ?, ?)", [selector, hashedValidator, req.session.username, expiry], function (err) {
+		if (err) {
+			console.log(err);
+		}
+	});
+}
+
+// Checks if user has a remember me cookie
+function checkCookie (req, res, next) {
+	let loggedin = false;
+	let cookies = req.headers.cookie;
+	if (cookies) {
+		let arr = cookies.split('; ');
+		let validator, selector;
+		// find remember me cookie from all cookies
+		for (let i in arr) {
+			// key value pairs of cookies are seperated with '='
+			let ar2 = arr[i].split("=");
+			// remember me cookie's selector starts with 'rem'
+			if (ar2[0].substring(0,3) == "rem") {
+				selector = ar2[0];
+				validator = ar2[1];
+				break;
+			}
+		}
+
+		if (validator) {
+			database.get("SELECT * FROM auth_tokens WHERE selector = ?", [selector], async function (err, result) {
+				if (err) {
+					console.log(err);
+				}
+				if (result) {
+					let check = await bcrypt.compare(validator, result.hashedValidator);
+					if (check) {
+						req.session.loggedin = true;
+						req.session.username = result.username;
+						next();
+					}
+				}
+			});
+		} else next();
+	} else next();
 }
