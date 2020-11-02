@@ -29,7 +29,7 @@ router.get("/", function (req, res) {
 });
 
 router.get("/favicon.ico", function (req, res) {
-    res.sendFile(path.join(__dirname + "/favicon.ico"));
+    res.sendFile(path.join(__dirname, "../favicon.ico"));
 });
 
 router.get("/rocket_dodge", function (req, res) {
