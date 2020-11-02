@@ -29,7 +29,7 @@ router.get("/", function (req, res) {
 });
 
 router.get("/favicon.ico", function (req, res) {
-    res.sendFile(path.join(__dirname, "../favicon.ico"));
+    res.sendFile(path.join(__dirname, "/../favicon.ico"));
 });
 
 router.get("/rocket_dodge", function (req, res) {
@@ -44,7 +44,7 @@ router.get("/rocket_dodge", function (req, res) {
             username = "You";
         }
         database.all(`SELECT username, pc_score AS score FROM rocket_dodge WHERE pc_score IS NOT NULL ORDER BY pc_score DESC LIMIT 5`, (err, result) => {
-            res.render(path.join(__dirname, "../games/rocket_dodge"), {
+            res.render(path.join(__dirname, "/../games/rocket_dodge"), {
                 username: username,
                 scores: JSON.stringify(result),
             });
@@ -60,14 +60,14 @@ router.get("/hold_dodge", function (req, res) {
     }
     if (req.useragent.isMobile) {
         database.all(`SELECT username, mobile_score AS score FROM hold_dodge WHERE mobile_score IS NOT NULL ORDER BY mobile_score DESC LIMIT 5`, (err, result) => {
-            res.render(path.join(__dirname, "../games/hold_dodge"), { //mobile is also checked on gamefiles no need to send here
+            res.render(path.join(__dirname, "/../games/hold_dodge"), { //mobile is also checked on gamefiles no need to send here
                 username: username,
                 scores: JSON.stringify(result),
             });
         });
     } else {
         database.all(`SELECT username, pc_score AS score FROM hold_dodge WHERE pc_score IS NOT NULL ORDER BY pc_score DESC LIMIT 5`, (err, result) => {
-            res.render(path.join(__dirname, "../games/hold_dodge"), {
+            res.render(path.join(__dirname, "/../games/hold_dodge"), {
                 username: username,
                 scores: JSON.stringify(result),
             });
@@ -82,14 +82,14 @@ router.get("/touch_dodge", function (req, res) {
     }
     if (req.useragent.isMobile) {
         database.all(`SELECT username, mobile_score AS score FROM touch_dodge WHERE mobile_score IS NOT NULL ORDER BY mobile_score DESC LIMIT 5`, (err, result) => {
-            res.render(path.join(__dirname, "../games/touch_dodge"), { //mobile is also checked on gamefiles no need to send here
+            res.render(path.join(__dirname, "/../games/touch_dodge"), { //mobile is also checked on gamefiles no need to send here
                 username: username,
                 scores: JSON.stringify(result),
             });
         });
     } else {
         database.all(`SELECT username, pc_score AS score FROM touch_dodge WHERE pc_score IS NOT NULL ORDER BY pc_score DESC LIMIT 5`, (err, result) => {
-            res.render(path.join(__dirname, "../games/touch_dodge"), {
+            res.render(path.join(__dirname, "/../games/touch_dodge"), {
                 username: username,
                 scores: JSON.stringify(result),
             });
@@ -104,14 +104,14 @@ router.get("/hold_dodge_accelerated", function (req, res) {
     }
     if (req.useragent.isMobile) {
         database.all(`SELECT username, mobile_score AS score FROM hold_dodge_accelerated WHERE mobile_score IS NOT NULL ORDER BY mobile_score DESC LIMIT 5`, (err, result) => {
-            res.render(path.join(__dirname, "../games/hold_dodge_accelerated"), { //mobile is also checked on gamefiles no need to send here
+            res.render(path.join(__dirname, "/../games/hold_dodge_accelerated"), { //mobile is also checked on gamefiles no need to send here
                 username: username,
                 scores: JSON.stringify(result),
             });
         });
     } else {
         database.all(`SELECT username, pc_score AS score FROM hold_dodge_accelerated WHERE pc_score IS NOT NULL ORDER BY pc_score DESC LIMIT 5`, (err, result) => {
-            res.render(path.join(__dirname, "../games/hold_dodge_accelerated"), {
+            res.render(path.join(__dirname, "/../games/hold_dodge_accelerated"), {
                 username: username,
                 scores: JSON.stringify(result),
             });
@@ -280,7 +280,7 @@ router.get("/downloads/:platform", function (req, res) {
 
 router.get("/downloads/android/:version", function (req, res) {
     if (req.session.loggedin) {
-        res.sendFile(path.join(__dirname, `../apks/${req.params.version}.apk`));
+        res.sendFile(path.join(__dirname, `/../apks/${req.params.version}.apk`));
     } else {
         res.redirect("/login");
     }
