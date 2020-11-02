@@ -2,7 +2,7 @@
   "name": "rocket-dodge-server",
   "version": "1.0.0",
   "description": "a basic website where you can play games",
-  "main": "index.js",
+  "main": "main.js",
   "dependencies": {
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
@@ -18,7 +18,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "sudo node index.js"
+    "test": "sudo node -r dotenv/config main.js"
   },
   "repository": {
     "type": "git",
