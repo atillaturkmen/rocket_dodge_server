@@ -3,7 +3,7 @@ const path = require("path");
 const bcrypt = require("bcrypt");
 
 const express = require("express");
-const router = express.Router;
+const router = express.Router();
 
 const database = require("./initialize_database");
 
