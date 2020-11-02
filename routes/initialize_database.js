@@ -7,3 +7,5 @@ let database = new sqlite3.Database(process.env.database_dir, (error) => {
         console.log('Connected to SQlite database.');
     }
 });
+
+module.exports = database;
