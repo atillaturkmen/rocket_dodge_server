@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router;
 
+const database = require("./initialize_database");
+
 const game_list = ["rocket_dodge", "hold_dodge", "hold_dodge_accelerated", "touch_dodge"];
 
 router.get("/", function (req, res) {
