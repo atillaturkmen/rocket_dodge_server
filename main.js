@@ -23,10 +23,6 @@ const path = require("path");
 const bodyParser = require('body-parser');
 const session = require("express-session");
 const useragent = require('express-useragent');
-const https_port = process.env.https_port;
-const http_port = process.env.http_port;
-const http = require("http");
-const https = require('https');
 
 const app = express();
 
@@ -69,8 +65,11 @@ app.set("view engine", "ejs");
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 
+
+const https_port = process.env.https_port;
+const http_port = process.env.http_port;
+const http = require("http");
 let http_server;
-let https_server;
 function create_http_server(app, port) {
 	console.log("Running on port " + port);
 	return http.createServer(app).listen(port);
@@ -79,22 +78,22 @@ function create_http_server(app, port) {
 if (argv.no_https){
 	http_server = create_http_server(app, http_port);
 } else {
+	const https = require('https');
 	const app2 = express(); //part below listens to http_port and redirects all traffic to https
 	http_server = create_http_server(app2, http_port);
 
-	const privateKey = fs.readFileSync(process.env.private_key_dir, 'utf8');
-	const certificate = fs.readFileSync(process.env.certificate_dir, 'utf8');
-
-	let credentials = {
-		key: privateKey,
-		cert: certificate
+	const credentials = {
+		key: fs.readFileSync(process.env.private_key_dir, 'utf8'),
+		cert: fs.readFileSync(process.env.certificate_dir, 'utf8')
 	};
+
 	app2.get("*", function (req, res) {
 		res.redirect("https://" + req.headers.host + req.url);
 	});
 
-	https_server = https.createServer(credentials, app).listen(https_port, function () {
+	const https_server = https.createServer(credentials, app).listen(https_port, function () {
 		console.log("Running on port " + https_port);
 	});
 }
 app.get("*", routes);
+app.post("*", routes);
