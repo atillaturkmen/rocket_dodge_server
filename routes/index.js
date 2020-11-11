@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 const express = require("express");
 const router = express.Router();
@@ -639,8 +640,8 @@ function randomString(len) {
 
 // ilk kez remember me kutucuğu işaretlenirse bu fonksiyon çalışır
 async function firstRememberMe(req, res) {
-    let selector = "rem" + randomString(9);
-    let validator = randomString(64);
+    let selector = "rem" + crypto.randomBytes(9).toString('hex');
+    let validator = crypto.randomBytes(64).toString('hex');
     res.cookie(selector, validator, { maxAge: 2592000000, httpOnly: true });
 
     let salt = await bcrypt.genSalt();
@@ -659,7 +660,6 @@ async function firstRememberMe(req, res) {
 
 // Checks if user has a remember me cookie
 function checkCookie(req, res, next) {
-    let loggedin = false;
     let cookies = req.headers.cookie;
     if (cookies) {
         let arr = cookies.split('; ');
