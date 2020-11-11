@@ -14,7 +14,6 @@
     "express-useragent": "^1.0.15",
     "qs": "^6.9.4",
     "redis": "^3.0.2",
-    "redis-rememberme": "^0.2.1",
     "sqlite3": "^4.2.0",
     "yargs": "^16.1.0"
   },
