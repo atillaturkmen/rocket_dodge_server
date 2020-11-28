@@ -1,3 +1,4 @@
 TODO:
-Seperate main.js to multiple files
+clean up code
 Add apks again
+move game to the server side

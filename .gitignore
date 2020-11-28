@@ -3,3 +3,4 @@ sqlite
 .env
 apks
 .idea
+connection_log.txt

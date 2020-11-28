@@ -408,7 +408,8 @@ router.post("/delete", function (req, res) {
 router.post("/score", function (req, res) {
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null);
     let current_time = return_time();
-    console.log(current_time + " : Data received from " + ip);
+    let text = "Username: " + req.session.username + " : " + JSON.stringify(req.body);
+    connection_log(text, ip, current_time);
     let username = req.session.username;
     let score_received = Number(req.body.score);
     let game_type = req.body.game_type;
@@ -417,51 +418,32 @@ router.post("/score", function (req, res) {
     if (is_mobile) {
         score_type = "mobile_score";
     }
-    console.log("loggedin: ", req.session.loggedin);
-    console.log(`username: ${username}, score: ${score_received}, game_type: ${game_type}, is_mobile: ${is_mobile}, score_type: ${score_type}`);
-    if (req.session.loggedin) {
+    if (req.session.loggedin && (game_list.indexOf(game_type) != -1) ) {
         database.get(`SELECT ${score_type} FROM ${game_type} WHERE username = ?`, [username], function (err, row) {
-            console.log("Retrieved row:", row);
             if (err) {
                 console.log(err);
             } else if (row) {
-                console.log("Row found, executing check...");
                 if (is_mobile) {
-                    console.log(`Is mobile:${is_mobile}`);
-                    console.log(`Row score:${row.mobile_score} Score received:${score_received}`);
                     if (row.mobile_score < score_received || row.mobile_score == undefined) {
-                        console.log("Updating row score...");
                         database.run(`UPDATE ${game_type} SET ${score_type} = ? WHERE username = ?`, [score_received, username], function (err) {
                             if (err) {
-                                console.log("Unable to update.");
                                 console.log(err);
-                            } else {
-                                console.log("Row updated!");
                             }
                         });
                     }
                 } else {
-                    console.log('Executing pc_score check...');
                     if (row.pc_score < score_received || row.pc_score == undefined) {
-                        console.log("Updating row score...");
                         database.run(`UPDATE ${game_type} SET ${score_type} = ? WHERE username = ?`, [score_received, username], function (err) {
                             if (err) {
-                                console.log("Unable to update.");
                                 console.log(err);
-                            } else {
-                                console.log("Row updated!");
                             }
                         });
                     }
                 }
             } else {
-                console.log("Row value not defined. Will try to insert value.");
                 database.run(`INSERT INTO ${game_type}(username,${score_type}) VALUES(?,?)`, [username, score_received], function (err) {
                     if (err) {
-                        console.log("Unable to insert.");
                         console.log(err);
-                    } else {
-                        console.log("Row inserted!");
                     }
                 });
             }
@@ -614,8 +596,8 @@ function return_time() {
 }
 
 function connection_log(text = "Connection from:", ip = '', time = '') {
-    file_name = "connection_log.txt";
-    fs.appendFile(file_name, `${time} : ${text} ${ip}\n`, () => {
+    let file_name = "connection_log.txt";
+    fs.appendFile(file_name, `${time} : ${text} : ${ip}\n`, () => {
         console.log(`Saved to ${file_name}`);
     });
 }
