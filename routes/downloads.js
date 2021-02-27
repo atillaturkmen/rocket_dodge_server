@@ -11,7 +11,7 @@ router.get("/downloads/view", function (req, res) {
             loggedin: req.session.loggedin
         });*/
     } else {
-        res.redirect("/login");
+        res.redirect("/account/login");
     }
 });
 
@@ -21,7 +21,7 @@ router.get("/downloads/:platform", function (req, res) {
             loggedin: req.session.loggedin
         });
     } else {
-        res.redirect("/login");
+        res.redirect("/account/login");
     }
 });
 
@@ -29,7 +29,7 @@ router.get("/downloads/android/:version", function (req, res) {
     if (req.session.loggedin) {
         res.sendFile(path.join(__dirname, `/../apks/${req.params.version}.apk`));
     } else {
-        res.redirect("/login");
+        res.redirect("/account/login");
     }
 });
 
