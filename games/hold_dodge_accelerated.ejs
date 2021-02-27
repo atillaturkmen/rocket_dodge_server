@@ -420,7 +420,7 @@
         function post_score(score, is_mobile = false) {
             let http = new XMLHttpRequest();
             let scorePostData = { game_type: "hold_dodge_accelerated", score: score, is_mobile: is_mobile };
-            http.open("POST", "/score", true);
+            http.open("POST", "/score/update", true);
             http.setRequestHeader('Content-type', 'application/json');
             http.send(JSON.stringify(scorePostData));
         }

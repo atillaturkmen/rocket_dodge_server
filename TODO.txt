@@ -1,4 +1,7 @@
 TODO:
-clean up code
+table for score post logging
+documentation
+table schema
+clean up code (report bugs)
 Add apks again
 move game to the server side

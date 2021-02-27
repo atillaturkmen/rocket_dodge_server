@@ -4,12 +4,12 @@
 
         <div class="navbar" id="navbar">
             <a class="nav-link text-white" href="/about">About the server</a>
-            <a class="nav-link text-white" href="/downloads">Downloads</a>
-            <a class="nav-link text-white" href="/high_scores">High Scores</a>
+            <a class="nav-link text-white" href="/downloads/view">Downloads</a>
+            <a class="nav-link text-white" href="/score/high_scores">High Scores</a>
             <%if (!loggedin) { %>
-            <a class="nav-link text-white" href="/login">Login-Register</a>
+            <a class="nav-link text-white" href="/account/login">Login-Register</a>
             <% }else{ %>
-            <a class="nav-link text-white" href="/profile">View Profile</a>
+            <a class="nav-link text-white" href="/profile/me">View Profile</a>
             <% } %>
         </div>
     </div>
