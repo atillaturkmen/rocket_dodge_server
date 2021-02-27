@@ -4,6 +4,8 @@ const return_time = require("./helper_functions").return_time;
 const express = require("./imports").express;
 const router = express.Router();
 
+const database = require("./imports").database;
+
 const account = require("./account");
 const downloads = require("./downloads");
 const games = require("./games");
