@@ -5,6 +5,7 @@ const express = require("./imports").express;
 const router = express.Router();
 
 const database = require("./imports").database;
+const bcrypt = require("./imports").bcrypt;
 
 const account = require("./account");
 const downloads = require("./downloads");
