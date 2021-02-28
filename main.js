@@ -1,6 +1,5 @@
-//omniamorsaequat.com
-//https://github.com/DBC201/rocket_dodge_server
-require("dotenv").config({path: "./.env.local"});
+const path = require("path");
+require("dotenv").config({path: path.join(__dirname, ".env.local")});
 const argv = require("yargs")(process.argv.slice(2))
 	.option("no_https", {
 		description: "runs http only",
@@ -19,7 +18,6 @@ const argv = require("yargs")(process.argv.slice(2))
 
 const express = require("express");
 const fs = require("fs");
-const path = require("path");
 const bodyParser = require('body-parser');
 const session = require("express-session");
 const useragent = require('express-useragent');
