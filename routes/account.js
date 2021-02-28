@@ -255,7 +255,7 @@ function crediential_response(username, password) {
     }
 }
 
-// ilk kez remember me kutucuğu işaretlenirse bu fonksiyon çalışır
+// this function runs when remember me box is ticked for the first time
 async function firstRememberMe(req, res) {
     let selector = "rem" + crypto.randomBytes(9).toString('hex');
     let validator = crypto.randomBytes(64).toString('hex');
