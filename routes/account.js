@@ -114,12 +114,12 @@ router.post("/account/delete", function (req, res) {
 });
 
 router.post('/account/auth', async (req, res) => {
-    let username_input = req.body.omniamorsaequat_username;
+    let username_input = req.body.username;
     let rememberMe = req.body.rememberMe;
     if (username_input) {
         database.get('SELECT password FROM accounts WHERE username = ?', username_input, async (error, result) => {
             if (result) {
-                let pass_check = await bcrypt.compare(req.body.omniamorsaequat_password, result.password);
+                let pass_check = await bcrypt.compare(req.body.password, result.password);
                 if (pass_check) {
                     req.session.loggedin = true;
                     req.session.username = username_input;

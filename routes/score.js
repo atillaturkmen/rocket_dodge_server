@@ -3,15 +3,12 @@ const router = express.Router();
 
 const database = require("./imports").database;
 const return_time = require("./helper_functions").return_time;
-const connection_log = require("./helper_functions").connection_log;
 
 const game_list = require("./imports").game_list;
 
 router.post("/score/update", function (req, res) {
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null);
-    let current_time = return_time();
-    let text = "Username: " + req.session.username + " : " + JSON.stringify(req.body);
-    connection_log(text, ip, current_time);
+    let time = return_time();
     let username = req.session.username;
     let score_received = Number(req.body.score);
     let game_type = req.body.game_type;
@@ -27,7 +24,7 @@ router.post("/score/update", function (req, res) {
             } else if (row) {
                 if (is_mobile) {
                     if (row.mobile_score < score_received || row.mobile_score === undefined) {
-                        database.run(`UPDATE ${game_type} SET ${score_type} = ? WHERE username = ?`, [score_received, username], function (err) {
+                        database.run(`UPDATE ${game_type} SET ${score_type} = ?, ${score_type+"_ip"} = ?, ${score_type+"_time"} = ? WHERE username = ?`, [score_received, ip, time, username], function (err) {
                             if (err) {
                                 console.log(err);
                             }
@@ -35,7 +32,7 @@ router.post("/score/update", function (req, res) {
                     }
                 } else {
                     if (row.pc_score < score_received || row.pc_score === undefined) {
-                        database.run(`UPDATE ${game_type} SET ${score_type} = ? WHERE username = ?`, [score_received, username], function (err) {
+                        database.run(`UPDATE ${game_type} SET ${score_type} = ?, ${score_type+"_ip"} = ?, ${score_type+"_time"} = ? WHERE username = ?`, [score_received, ip, time, username], function (err) {
                             if (err) {
                                 console.log(err);
                             }
@@ -43,7 +40,7 @@ router.post("/score/update", function (req, res) {
                     }
                 }
             } else {
-                database.run(`INSERT INTO ${game_type}(username,${score_type}) VALUES(?,?)`, [username, score_received], function (err) {
+                database.run(`INSERT INTO ${game_type}(username,${score_type},${score_type+"_ip"},${score_type+"_time"}) VALUES(?,?,?,?)`, [username, score_received, ip, time], function (err) {
                     if (err) {
                         console.log(err);
                     }

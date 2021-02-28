@@ -64,7 +64,7 @@ function checkCookie(req, res, next) {
         let arr = cookies.split('; ');
         let validator, selector;
         // find remember me cookie from all cookies
-        for (let i in arr) {
+        for (let i=0; i<arr.length; i++) {
             // key value pairs of cookies are seperated with '='
             let ar2 = arr[i].split("=");
             // remember me cookie's selector starts with 'rem'
@@ -86,8 +86,8 @@ function checkCookie(req, res, next) {
                         req.session.loggedin = true;
                         req.session.username = result.username;
                         next();
-                    }
-                }
+                    } else next();
+                } else next();
             });
         } else next();
     } else next();

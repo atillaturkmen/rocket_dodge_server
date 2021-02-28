@@ -1,5 +1,3 @@
-const fs = require("./imports").fs;
-
 let return_time = function () {
     let date_ob = new Date();
     let date = ("0" + date_ob.getDate()).slice(-2);
@@ -10,13 +8,6 @@ let return_time = function () {
     let seconds = date_ob.getSeconds();
     let dateDisplay = `${date}/${month}/${year} ${hours}:${minutes}:${seconds}`;
     return dateDisplay;
-}
-
-let connection_log = function (text = "Connection from:", ip = '', time = '') {
-    let file_name = "connection_log.txt";
-    fs.appendFile(file_name, `${time} : ${text} : ${ip}\n`, () => {
-        console.log(`Saved to ${file_name}`);
-    });
 }
 
 let randomString = function (len) {
@@ -39,6 +30,5 @@ let randomString = function (len) {
 
 module.exports = {
     return_time: return_time,
-    connection_log: connection_log,
     randomString: randomString
 };

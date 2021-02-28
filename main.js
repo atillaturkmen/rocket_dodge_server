@@ -1,6 +1,6 @@
 //omniamorsaequat.com
 //https://github.com/DBC201/rocket_dodge_server
-require("dotenv").config();
+require("dotenv").config({path: "./.env.local"});
 const argv = require("yargs")(process.argv.slice(2))
 	.option("no_https", {
 		description: "runs http only",
