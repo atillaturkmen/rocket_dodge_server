@@ -400,7 +400,7 @@
         function post_score(score) {
             let http = new XMLHttpRequest();
             let scorePostData = { game_type: "rocket_dodge", score: score, is_mobile: false };
-            http.open("POST", "/score", true);
+            http.open("POST", "/score/update", true);
             http.setRequestHeader('Content-type', 'application/json');
             http.send(JSON.stringify(scorePostData));
         }

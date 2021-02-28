@@ -1,4 +1,0 @@
-TODO:
-clean up code
-Add apks again
-move game to the server side

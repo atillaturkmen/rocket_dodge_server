@@ -1,6 +1,2 @@
 node_modules
-sqlite
-.env
-apks
-.idea
-connection_log.txt
+.env.local
