@@ -48,7 +48,7 @@ router.get("/", function (req, res) {
 });
 
 router.get("/favicon.ico", function (req, res) {
-    res.sendFile(path.join(__dirname, "/../favicon.ico"));
+    res.sendFile(path.join(__dirname, "/../public/favicon.ico"));
 });
 
 router.get("/about", function (req, res) {
