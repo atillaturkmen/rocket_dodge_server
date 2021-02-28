@@ -1,6 +1,6 @@
 {
   "name": "rocket-dodge-server",
-  "version": "1.9.0",
+  "version": "2.0.0",
   "description": "a website where you can play games",
   "main": "main.js",
   "dependencies": {
