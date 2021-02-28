@@ -5,6 +5,7 @@ const database = require("./imports").database;
 const return_time = require("./helper_functions").return_time;
 
 const game_list = require("./imports").game_list;
+const game_name_list = require("./imports").game_name_list;
 
 router.post("/score/update", function (req, res) {
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null);
@@ -80,6 +81,7 @@ router.get("/score/high_scores/:game_type", function (req, res) {
                         pc_scores: pc_scores,
                         mobile_scores: mobile_scores,
                         game_type: req.params.game_type,
+                        names: game_name_list,
                     });
                 });
             } else {
@@ -90,6 +92,7 @@ router.get("/score/high_scores/:game_type", function (req, res) {
                     pc_scores: [],
                     mobile_scores: [],
                     game_type: req.params.game_type,
+                    names: game_name_list,
                 });
             }
         });

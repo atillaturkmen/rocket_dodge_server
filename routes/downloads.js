@@ -5,7 +5,7 @@ router.get("/downloads/view", function (req, res) {
     if (req.session.loggedin) {
         res.render("message", {
             loggedin: req.session.loggedin,
-            message: "Downloads currently unavailible"
+            message: "Downloads currently unavailable"
         });
         /*res.render("downloads", {
             loggedin: req.session.loggedin

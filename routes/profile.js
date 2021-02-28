@@ -4,6 +4,7 @@ const router = express.Router();
 const database = require("./imports").database;
 
 const game_list = require("./imports").game_list;
+const game_name_list = require("./imports").game_name_list;
 
 router.get("/profile/me", function (req, res) {
     if (req.session.loggedin) {
@@ -32,6 +33,7 @@ router.get("/profile/me", function (req, res) {
                     res.render("profile", {
                         score_table: score_table,
                         loggedin: req.session.loggedin,
+                        names: game_name_list,
                     });
                 }
             });
@@ -69,7 +71,8 @@ router.get("/profile/:username", function (req, res) {
                         res.render("public_profile", {
                             score_table: score_table,
                             loggedin: req.session.loggedin,
-                            username: req.params.username
+                            username: req.params.username,
+                            names: game_name_list,
                         });
                     }
                 });
