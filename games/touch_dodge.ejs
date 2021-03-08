@@ -8,19 +8,19 @@
 
 <body onload="myGameArea.initialize()">
 
-    <div id="tutorial" class="overlay tutorial" onclick="myGameArea.start()" ontouchstart="myGameArea.start()">
+    <div id="tutorial" class="overlay tutorial" onclick="myGameArea.start()">
         <div id="tutorialText" class="overlay-text">Avoid the dots, make them collide with each other to gain points.
             Pause with esc and tap to move around. Press B to toggle dark mode.<br><br>Click anywhere or press spacebar
             to start</div>
         <%- include('icons'); -%>
     </div>
 
-    <div id="pause" class="overlay" onclick="myGameArea.resume()" ontouchstart="myGameArea.resume()">
+    <div id="pause" class="overlay" onclick="myGameArea.resume()">
         <div id="pauseText" class="overlay-text">Press ESC or tap the screen to resume.</div>
         <%- include('icons'); -%>
     </div>
 
-    <div id="gameover" class="overlay" onclick="myGameArea.restart()" ontouchstart="myGameArea.restart()">
+    <div id="gameover" class="overlay" onclick="myGameArea.restart()">
         <div id="gameOverText" class="overlay-text"></div>
         <%- include('icons'); -%>
     </div>
