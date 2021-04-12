@@ -75,39 +75,46 @@ router.post("/account/delete", function (req, res) {
             if (err) {
                 console.log(err);
             }
-            let pass_check = await bcrypt.compare(req.body.password, row.password);
-            if (pass_check) {
-                database.run("DELETE FROM accounts WHERE username = ?", [req.session.username], function (err) {
-                    console.log(err);
-                });
-                for (let i=0; i<game_list.length; i++) {
-                    database.run(`DELETE FROM ${game_list[i]} WHERE username = ?`, [req.session.username], function (err) {
-                        console.log(err);
-                    });
-                }
-                database.run("DELETE FROM auth_tokens WHERE username = ?", [req.session.username], function (err) {
-                    if (err) {
-                        console.log(err);
-                    }
-                });
-                req.session.destroy();
-                let cookies = req.headers.cookie;
-                if (cookies) {
-                    let arr = cookies.split('; ');
-                    for (let i in arr) {
-                        let ar2 = arr[i].split("=");
-                        res.clearCookie(ar2[0]);
-                    }
-                }
+            if (row === undefined) {
                 res.render("message", {
                     loggedin: false,
-                    message: "Account succesfully deleted!"
+                    message: "Error deleting account"
                 });
             } else {
-                res.render("message", {
-                    loggedin: req.session.loggedin,
-                    message: "Wrong password!"
-                });
+                let pass_check = await bcrypt.compare(req.body.password, row.password);
+                if (pass_check) {
+                    database.run("DELETE FROM accounts WHERE username = ?", [req.session.username], function (err) {
+                        console.log(err);
+                    });
+                    for (let i=0; i<game_list.length; i++) {
+                        database.run(`DELETE FROM ${game_list[i]} WHERE username = ?`, [req.session.username], function (err) {
+                            console.log(err);
+                        });
+                    }
+                    database.run("DELETE FROM auth_tokens WHERE username = ?", [req.session.username], function (err) {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
+                    req.session.destroy();
+                    let cookies = req.headers.cookie;
+                    if (cookies) {
+                        let arr = cookies.split('; ');
+                        for (let i in arr) {
+                            let ar2 = arr[i].split("=");
+                            res.clearCookie(ar2[0]);
+                        }
+                    }
+                    res.render("message", {
+                        loggedin: false,
+                        message: "Account succesfully deleted!"
+                    });
+                } else {
+                    res.render("message", {
+                        loggedin: req.session.loggedin,
+                        message: "Wrong password!"
+                    });
+                }
             }
         });
     } else {
