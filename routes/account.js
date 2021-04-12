@@ -5,6 +5,8 @@ const database = require("./imports").database;
 const bcrypt = require("./imports").bcrypt;
 const crypto = require("./imports").crypto;
 
+const game_list = require("./imports").game_list;
+
 router.get('/account/register', function (req, res) {
     if (req.session.loggedin) {
         res.render("message", {
@@ -78,7 +80,7 @@ router.post("/account/delete", function (req, res) {
                 database.run("DELETE FROM accounts WHERE username = ?", [req.session.username], function (err) {
                     console.log(err);
                 });
-                for (let i in game_list) {
+                for (let i=0; i<game_list.length; i++) {
                     database.run(`DELETE FROM ${game_list[i]} WHERE username = ?`, [req.session.username], function (err) {
                         console.log(err);
                     });
