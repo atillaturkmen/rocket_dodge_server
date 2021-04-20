@@ -1,3 +1,0 @@
-TODO:
-Seperate index.js to multiple files
-Add apks again

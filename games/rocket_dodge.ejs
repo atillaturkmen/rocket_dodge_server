@@ -1,57 +1,13 @@
-<!--- omniamorsaequat.com/rocket_dodge --->
+<!--- rocketdodgegame.com/rocket_dodge --->
 <!--- https://github.com/DBC201/rocket_dodge_server --->
 <!--- https://github.com/atillaturkmen --->
 <!DOCTYPE html>
 <html>
 
 <head>
-    <link rel="icon" href="https://omniamorsaequat.com/favicon.ico?id=31">
-    <LINK REL="shortcut icon" HREF="https://omniamorsaequat.com/favicon.ico?id=69" TYPE="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <%- include('game_header'); -%>
     <title>Rocket Dodge</title>
-    <style>
-        html,
-        body {
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            background-color: #09daff;
-        }
-
-        canvas {
-            background-color: #09daff;
-            cursor: none;
-        }
-
-        .overlay {
-            position: fixed;
-            display: none;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2;
-        }
-
-        .overlay.tutorial {
-            cursor: pointer;
-            display: block;
-        }
-
-        .overlay-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            font-size: 45px;
-            color: white;
-            transform: translate(-50%, -50%);
-            -ms-transform: translate(-50%, -50%);
-        }
-    </style>
+    <style> canvas {cursor: none;} </style>
 </head>
 
 <body onload="myGameArea.initialize()">
@@ -60,14 +16,17 @@
         <div id="tutorialText" class="overlay-text">Avoid the dots, make them collide with each other to gain points.
             Pause with esc, steer with arrows or wasd. Press B to toggle dark mode.<br><br>Click anywhere or press
             spacebar to start</div>
+            <%- include('icons'); -%>
     </div>
 
     <div id="pause" class="overlay">
         <div id="pauseText" class="overlay-text">Press ESC to resume</div>
+        <%- include('icons'); -%>
     </div>
 
     <div id="gameover" class="overlay">
         <div id="gameOverText" class="overlay-text"></div>
+        <%- include('icons'); -%>
     </div>
 
     <script>
@@ -400,7 +359,7 @@
         function post_score(score) {
             let http = new XMLHttpRequest();
             let scorePostData = { game_type: "rocket_dodge", score: score, is_mobile: false };
-            http.open("POST", "/score", true);
+            http.open("POST", "/score/update", true);
             http.setRequestHeader('Content-type', 'application/json');
             http.send(JSON.stringify(scorePostData));
         }

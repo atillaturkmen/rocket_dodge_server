@@ -1,6 +1,2 @@
 node_modules
-sqlite
-.env
-output.log
-apks
-admins.txt
+.env.local

@@ -1,4 +1,4 @@
-<!--- omniamorsaequat.com --->
+<!--- rocketdodgegame.com --->
 <!--- https://github.com/DBC201/rocket_dodge_server --->
 <!DOCTYPE html>
 <html>
@@ -25,7 +25,7 @@
                         </thead>
                         <% for (var i = 0; i < score_table.length; i++) { %>
                         <tr>
-                                <td scope="row"><a href = "/high_scores/<%= score_table[i][0] %>"><%= score_table[i][0] %></a></td>
+                                <td scope="row"><a href = "/score/high_scores/<%= score_table[i][0] %>"><%= names[score_table[i][0]] %></a></td>
                                 <% for (var j = 1; j < score_table.length; j++) { %>
                                 <td><%= score_table[i][j] %></td>
                                 <% } %>
@@ -34,13 +34,13 @@
                 </table>
                 <br>
                 <br>
-                <a href="/change_password">Change password</a>
+                <a href="/account/change_password">Change password</a>
                 <br>
                 <br>
-                <a href="/logout">Logout</a>
+                <a href="/account/logout">Logout</a>
                 <br>
                 <br>
-                <a class="text-danger" href="/delete_account" ,
+                <a class="text-danger" href="/account/delete_account" ,
                         onclick="return confirm('Do you really want to delete your account?')">Delete
                         Account</a>
         </div>

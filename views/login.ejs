@@ -5,7 +5,7 @@
 
 <head>
 	<title>Login</title>
-	<link rel="stylesheet" href="public/register-form.css">
+	<link rel="stylesheet" href="../public/css/register-form.css">
 </head>
 
 <body>
@@ -13,15 +13,15 @@
 	<br>
 	<div class="login-form text-center">
 		<h1>Login Form</h1>
-		<form action="auth" method="POST">
-			<input type="text" name="omniamorsaequat_username" placeholder="Username" required>
-			<input type="password" name="omniamorsaequat_password" placeholder="Password" required>
+		<form action="/account/auth" method="POST">
+			<input type="text" name="username" placeholder="Username" required>
+			<input type="password" name="password" placeholder="Password" required>
 			<input type="checkbox" id="rememberMe" name="rememberMe" title="Don't check this on public computers" checked>
 			<label for="rememberMe" title="Don't check this on public computers"> Remember Me</label><br>
 			<button type="submit">Login</button>
 		</form>
 		<br>
-		<form action="register" method="GET"><button type="submit">Register</button></form>
+		<form action="/account/register" method="GET"><button type="submit">Register</button></form>
 	</div>
 </body>
 

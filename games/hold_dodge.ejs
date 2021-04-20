@@ -2,52 +2,8 @@
 <html>
 
 <head>
-    <link rel="icon" href="https://omniamorsaequat.com/favicon.ico?id=31">
-    <LINK REL="shortcut icon" HREF="https://omniamorsaequat.com/favicon.ico?id=69" TYPE="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <%- include('game_header'); -%>
     <title>Hold Dodge</title>
-    <style>
-        html,
-        body {
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            background-color: #09daff;
-        }
-
-        canvas {
-            background-color: #09daff;
-        }
-
-        .overlay {
-            position: fixed;
-            display: none;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2;
-        }
-
-        .overlay.tutorial {
-            cursor: pointer;
-            display: block;
-        }
-
-        .overlay-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            font-size: 3vmax;
-            color: white;
-            transform: translate(-50%, -50%);
-            -ms-transform: translate(-50%, -50%);
-        }
-    </style>
 </head>
 
 <body onload="myGameArea.initialize()">
@@ -56,14 +12,17 @@
         <div id="tutorialText" class="overlay-text">Avoid the dots, make them collide with each other to gain points.
             Pause with esc, steer with your cursor or by holding down on screen. Press B to toggle dark
             mode.<br><br>Click anywhere or press spacebar to start</div>
+        <%- include('icons'); -%>
     </div>
 
-    <div id="pause" class="overlay" onclick="myGameArea.resume()" ontouchstart="myGameArea.resume()">
+    <div id="pause" class="overlay" onclick="myGameArea.resume()">
         <div id="pauseText" class="overlay-text">Press ESC or click to resume</div>
+        <%- include('icons'); -%>
     </div>
 
     <div id="gameover" class="overlay" onclick="myGameArea.restart()">
         <div id="gameOverText" class="overlay-text"></div>
+        <%- include('icons'); -%>
     </div>
 
     <script>
@@ -420,7 +379,7 @@
         function post_score(score, is_mobile = false) {
             let http = new XMLHttpRequest();
             let scorePostData = { game_type: "hold_dodge", score: score, is_mobile: is_mobile };
-            http.open("POST", "/score", true);
+            http.open("POST", "/score/update", true);
             http.setRequestHeader('Content-type', 'application/json');
             http.send(JSON.stringify(scorePostData));
         }
