@@ -12,6 +12,11 @@ const game_name_list = {
   "touch_dodge": "Touch Dodge",
 };
 
+const platform_list = {
+  "pc_score": "PC Score",
+  "mobile_score": "Mobile Score"
+};
+
 module.exports = {
   fs: fs,
   path: path,
@@ -21,4 +26,5 @@ module.exports = {
   database: database,
   game_list: game_list,
   game_name_list: game_name_list,
+  platform_list: platform_list
 };

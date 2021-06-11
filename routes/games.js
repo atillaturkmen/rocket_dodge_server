@@ -2,8 +2,43 @@ const express = require("./imports").express;
 const router = express.Router();
 
 const path = require("./imports").path;
-
 const database = require("./imports").database;
+const game_name_list = require("./imports").game_name_list;
+const platform_list = require("./imports").platform_list;
+
+router.get("/games/:username/:game_type/:platform", function (req, res){
+    let game_type = req.params.game_type;
+    let platform = req.params.platform;
+    let username = req.params.username;
+    if (game_type in game_name_list && platform in platform_list) {
+        database.get(`SELECT ${platform+"_replay"} FROM ${game_type} WHERE username = ?`, [username], (err, row) =>{
+            if (err) {
+                res.render("message", {
+                    loggedin: req.session.loggedin,
+                    message: "An error occured, please try again later. Report this issue if it persists."
+                });
+            } else if (row) {
+                database.all(`SELECT username, pc_score AS score FROM rocket_dodge WHERE pc_score IS NOT NULL ORDER BY pc_score DESC LIMIT 5`, (err, result) => {
+                    res.render(path.join(__dirname, "/../games/replay"), {
+                        username: username,
+                        scores: JSON.stringify(result),
+                        game_states: row[`${platform+"_replay"}`]
+                    });
+                });
+            } else {
+                res.render("message", {
+                    loggedin: req.session.loggedin,
+                    message: "That replay doesn't exist!"
+                });
+            }
+        });
+    } else {
+        res.render("message", {
+            loggedin: req.session.loggedin,
+            message: "invalid game or platform"
+        });
+    }
+});
 
 router.get("/games/rocket_dodge", function (req, res) {
     if (req.useragent.isMobile) {
@@ -23,7 +58,6 @@ router.get("/games/rocket_dodge", function (req, res) {
             });
         });
     }
-
 });
 
 router.get("/games/hold_dodge", function (req, res) {

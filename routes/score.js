@@ -18,6 +18,7 @@ router.post("/score/update", function (req, res) {
     if (is_mobile) {
         score_type = "mobile_score";
     }
+    let replay_data = JSON.stringify(req.body.game_states);
     if (req.session.loggedin && (game_list.indexOf(game_type) !== -1) ) {
         database.get(`SELECT ${score_type} FROM ${game_type} WHERE username = ?`, [username], function (err, row) {
             if (err) {
@@ -25,7 +26,7 @@ router.post("/score/update", function (req, res) {
             } else if (row) {
                 if (is_mobile) {
                     if (row.mobile_score < score_received || row.mobile_score === undefined) {
-                        database.run(`UPDATE ${game_type} SET ${score_type} = ?, ${score_type+"_ip"} = ?, ${score_type+"_time"} = ? WHERE username = ?`, [score_received, ip, time, username], function (err) {
+                        database.run(`UPDATE ${game_type} SET ${score_type} = ?, ${score_type+"_ip"} = ?, ${score_type+"_time"} = ?, ${score_type+"_replay"} = ? WHERE username = ?`, [score_received, ip, time, replay_data, username], function (err) {
                             if (err) {
                                 console.log(err);
                             }
@@ -33,7 +34,7 @@ router.post("/score/update", function (req, res) {
                     }
                 } else {
                     if (row.pc_score < score_received || row.pc_score === undefined) {
-                        database.run(`UPDATE ${game_type} SET ${score_type} = ?, ${score_type+"_ip"} = ?, ${score_type+"_time"} = ? WHERE username = ?`, [score_received, ip, time, username], function (err) {
+                        database.run(`UPDATE ${game_type} SET ${score_type} = ?, ${score_type+"_ip"} = ?, ${score_type+"_time"} = ?, ${score_type+"_replay"} = ? WHERE username = ?`, [score_received, ip, time, replay_data, username], function (err) {
                             if (err) {
                                 console.log(err);
                             }
@@ -41,7 +42,7 @@ router.post("/score/update", function (req, res) {
                     }
                 }
             } else {
-                database.run(`INSERT INTO ${game_type}(username,${score_type},${score_type+"_ip"},${score_type+"_time"}) VALUES(?,?,?,?)`, [username, score_received, ip, time], function (err) {
+                database.run(`INSERT INTO ${game_type}(username,${score_type},${score_type+"_ip"},${score_type+"_time"},${score_type+"_replay"}) VALUES(?,?,?,?,?)`, [username, score_received, ip, time, replay_data], function (err) {
                     if (err) {
                         console.log(err);
                     }
@@ -104,4 +105,7 @@ router.get("/score/high_scores/:game_type", function (req, res) {
     }
 });
 
+router.get("/score/high_scores/:game_type", function (req, res) {
+    res.send("incomplete");
+});
 module.exports = router;

@@ -52,6 +52,10 @@
         let rightPressed, leftPressed, upPressed, downPressed;
         let score = 0;
 
+        //game states will consist of objects and coordinates
+        // [[score, ["player": [x, y, angle]], ["rocket": [x, y]], ["rocket": [x,y]], ...],...]
+        let game_states = [];
+
         //contains canvas and canvas related methods
         var myGameArea = {
             canvas: document.createElement("canvas"), // create the canvas
@@ -117,7 +121,7 @@
                 this.ongoing = false;
                 this.interval.pause();
                 this.scoreCounter.pause();
-                post_score(score); //posts score so the server can retrieve
+                post_score(); //posts score so the server can retrieve
                 if (scores.length) {
                     //console.log(scores);
                     if ((scores.length < 5) || (score > scores[scores.length - 1].score)) {
@@ -180,6 +184,7 @@
             this.currentAngle = 0; // where the player is facing right now
             this.x = x;
             this.y = y;
+
             // update component position
             this.newPos = function () {
                 this.currentAngle += this.moveAngle; // add angle change to current angle
@@ -291,6 +296,12 @@
         // this method updates the game area, is called every frame
         function updateGameArea() {
             myGameArea.frameNo++;
+
+            let current_objects = [score, ["player", [myGamePiece.x, myGamePiece.y, myGamePiece.angle]]];
+            for (let i = 0; i < missiles.length; i++) {
+                current_objects.push(["rocket", [missiles[i].x, missiles[i].y]]);
+            }
+            game_states.push(current_objects);
             // check if player collides with one of missiles
             for (i = 0; i < missiles.length; i++) {
                 if (myGamePiece.crashWith(missiles[i])) {
@@ -356,9 +367,14 @@
             printScore(score);
         }
 
-        function post_score(score) {
+        function post_score() {
             let http = new XMLHttpRequest();
-            let scorePostData = { game_type: "rocket_dodge", score: score, is_mobile: false };
+            let scorePostData = {
+                game_type: "rocket_dodge",
+                score: score,
+                is_mobile: false,
+                game_states: [[myGameArea.canvas.width, myGameArea.canvas.height],game_states]
+            };
             http.open("POST", "/score/update", true);
             http.setRequestHeader('Content-type', 'application/json');
             http.send(JSON.stringify(scorePostData));
