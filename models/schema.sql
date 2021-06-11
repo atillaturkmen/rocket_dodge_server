@@ -1,5 +1,5 @@
 BEGIN TRANSACTION;
-ALTER TABLE IF EXISTS "rocket_dodge" to "rocket_dodge_legacy";
+ALTER TABLE "rocket_dodge" RENAME TO "rocket_dodge_legacy";
 CREATE TABLE IF NOT EXISTS "rocket_dodge" (
 	"username"	TEXT UNIQUE,
 	"pc_score"	INTEGER,
