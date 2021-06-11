@@ -34,6 +34,7 @@ router.get("/profile/me", function (req, res) {
                         score_table: score_table,
                         loggedin: req.session.loggedin,
                         names: game_name_list,
+                        username: req.session.username
                     });
                 }
             });
