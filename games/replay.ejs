@@ -9,6 +9,7 @@
     <title>Rocket Dodge</title>
     <style> canvas {
             cursor: none;
+            background: black;
         } </style>
     <script>
 
@@ -38,6 +39,7 @@
 <script>
     let scores = <%- scores %>;
     let username = "<%= username %>";
+    let game_type = "<%= game_type%>"
     // variables below can be changed arbitrarily
     const fps = 60; // frame number per second
     //const speed = 10; // how many pixels the player moves in one frame
@@ -51,8 +53,8 @@
     let playerHeadColor = "grey"; // color of the player's head
     let scoreTextColor = "black"; // color of the score text color
 
-    let playerHeight = 10;
-    let playerWidth = 60;
+    let playerWidth = 10;
+    let playerHeight = 60;
     let myGamePiece; // rocket that the player controls
     //let missiles = []; // array which contains hostile missiles
     //let missileInterval;
@@ -182,8 +184,8 @@
         },
     }
 
-    function coordinate_adjust(coordinate) {
-        return coordinate * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920));
+    function coordinate_adjust(coordinate, width=myGameArea.canvas.width, height=myGameArea.canvas.height) {
+        return coordinate * ((width * height) / (1080 * 1920));
     }
 
     function player(width, height, color, headColor, x, y) {
@@ -377,7 +379,6 @@
         myGamePiece.newPos();
         myGamePiece.update();
         printScore(score);*/
-        myGameArea.clear();
         // resize the canvas if window size has changed
         if ((window.innerWidth != myGameArea.canvas.width) || (window.innerHeight != myGameArea.canvas.height)) {
             myGameArea.canvas.width = window.innerWidth;
@@ -387,27 +388,43 @@
             myGameArea.gameover();
             return;
         }
+        myGameArea.clear();
         let current_state = game_states[0];
         game_states.splice(0, 1);
-        score = current_state[0];
+        let played_width = current_state[0][0];
+        let played_height = current_state[0][1];
+        score = current_state[1];
+        let user_screen = new missile(coordinate_adjust(played_width), coordinate_adjust(played_height), "#09daff", 0, 0);
+        user_screen.update();
         let player_piece = undefined;
-        console.log(current_state);
-        for (let i = 1; i < current_state.length; i++) {
+        //console.log(current_state);
+        for (let i = 2; i < current_state.length; i++) {
             let raw_drawable = current_state[i];
             if (raw_drawable[0] == "player") {
-                player_piece = new player(
-                    coordinate_adjust(playerHeight),
-                    coordinate_adjust(playerWidth),
-                    playerColor,
-                    playerHeadColor,
-                    coordinate_adjust(raw_drawable[1][0]),
-                    coordinate_adjust(raw_drawable[1][1])
-                );
-                player_piece.angle = raw_drawable[1][2];
+                if (game_type == "rocket_dodge") {
+                    player_piece = new player(
+                        coordinate_adjust(playerWidth, coordinate_adjust(played_width), coordinate_adjust(played_height)),
+                        coordinate_adjust(playerHeight, coordinate_adjust(played_width), coordinate_adjust(played_height)),
+                        playerColor,
+                        playerHeadColor,
+                        coordinate_adjust(raw_drawable[1][0]),
+                        coordinate_adjust(raw_drawable[1][1])
+                    );
+                    player_piece.angle = raw_drawable[1][2];
+                } else {
+                    player_piece = new missile( // player size is same as missile size in other variations
+                        coordinate_adjust(missileSize, coordinate_adjust(played_width), coordinate_adjust(played_height)),
+                        coordinate_adjust(missileSize, coordinate_adjust(played_width), coordinate_adjust(played_height)),
+                        playerColor,
+                        coordinate_adjust(raw_drawable[1][0]),
+                        coordinate_adjust(raw_drawable[1][1]),
+                        //missileSpeed
+                    );
+                }
             } else if (raw_drawable[0] == "rocket") {
-                let rocket = new missile(
-                    coordinate_adjust(missileSize),
-                    coordinate_adjust(missileSize),
+                let rocket = new missile( // player size is same as missile size in other variations
+                    coordinate_adjust(missileSize, coordinate_adjust(played_width), coordinate_adjust(played_height)),
+                    coordinate_adjust(missileSize, coordinate_adjust(played_width), coordinate_adjust(played_height)),
                     missileColor,
                     coordinate_adjust(raw_drawable[1][0]),
                     coordinate_adjust(raw_drawable[1][1]),

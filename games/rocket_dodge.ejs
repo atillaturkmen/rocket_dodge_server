@@ -48,8 +48,8 @@
     let playerHeadColor = "grey"; // color of the player's head
     let scoreTextColor = "black"; // color of the score text color
 
-    let playerHeight = 10;
-    let playerWidth = 60;
+    let playerWidth = 10;
+    let playerHeight = 60;
     let myGamePiece; // rocket that the player controls
     let missiles = []; // array which contains hostile missiles
     let missileInterval;
@@ -85,7 +85,7 @@
             this.context = this.canvas.getContext("2d"); // context field provides access to various useful canvas methods
             document.body.appendChild(this.canvas); // insert canvas into html
 
-            myGamePiece = new player(coordinate_adjust(playerHeight), coordinate_adjust(playerWidth), playerColor, playerHeadColor, coordinate_adjust(225), coordinate_adjust(225)); // initialize player
+            myGamePiece = new player(coordinate_adjust(playerWidth), coordinate_adjust(playerHeight), playerColor, playerHeadColor, coordinate_adjust(225), coordinate_adjust(225)); // initialize player
             myGamePiece.update();
             printScore(score);
         },
@@ -308,7 +308,7 @@
     function updateGameArea() {
         myGameArea.frameNo++;
 
-        let current_objects = [score, ["player", [myGamePiece.x, myGamePiece.y, myGamePiece.angle]]];
+        let current_objects = [[myGameArea.canvas.width, myGameArea.canvas.height], score, ["player", [myGamePiece.x, myGamePiece.y, myGamePiece.angle]]];
         for (let i = 0; i < missiles.length; i++) {
             current_objects.push(["rocket", [missiles[i].x, missiles[i].y]]);
         }
@@ -316,6 +316,7 @@
         // check if player collides with one of missiles
         for (i = 0; i < missiles.length; i++) {
             if (myGamePiece.crashWith(missiles[i])) {
+                console.log(game_states.length);
                 myGameArea.gameover();
                 return;
             }

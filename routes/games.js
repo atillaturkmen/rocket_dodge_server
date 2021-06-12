@@ -22,7 +22,8 @@ router.get("/games/:username/:game_type/:platform", function (req, res){
                     res.render(path.join(__dirname, "/../games/replay"), {
                         username: username,
                         scores: JSON.stringify(result),
-                        game_states: row[`${platform+"_replay"}`]
+                        game_states: row[`${platform+"_replay"}`],
+                        game_type: game_type
                     });
                 });
             } else {

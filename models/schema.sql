@@ -1,5 +1,8 @@
 BEGIN TRANSACTION;
 ALTER TABLE "rocket_dodge" RENAME TO "rocket_dodge_legacy";
+ALTER TABLE "hold_dodge" RENAME TO "hold_dodge_legacy";
+ALTER TABLE "hold_dodge_accelerated" RENAME TO "hold_dodge_accelerated_legacy";
+ALTER TABLE "touch_dodge" RENAME TO "touch_dodge_legacy";
 CREATE TABLE IF NOT EXISTS "rocket_dodge" (
 	"username"	TEXT UNIQUE,
 	"pc_score"	INTEGER,
@@ -14,15 +17,17 @@ CREATE TABLE IF NOT EXISTS "rocket_dodge" (
 	FOREIGN KEY("username") REFERENCES "accounts"
 );
 CREATE TABLE IF NOT EXISTS "touch_dodge" (
-	"username"	CHAR(128),
+	"username"	TEXT UNIQUE,
 	"pc_score"	INTEGER,
 	"mobile_score"	INTEGER,
 	"pc_score_ip"	TEXT,
 	"mobile_score_ip"	TEXT,
 	"pc_score_time"	TEXT,
 	"mobile_score_time"	TEXT,
+	"pc_score_replay"	BLOB,
+	"mobile_score_replay"	BLOB,
 	PRIMARY KEY("username"),
-	FOREIGN KEY("username") REFERENCES "accounts"("username")
+	FOREIGN KEY("username") REFERENCES "accounts"
 );
 CREATE TABLE IF NOT EXISTS "rocket_dodge_legacy" (
 	"username"	CHAR(128),
@@ -36,26 +41,30 @@ CREATE TABLE IF NOT EXISTS "rocket_dodge_legacy" (
 	FOREIGN KEY("username") REFERENCES "accounts"("username")
 );
 CREATE TABLE IF NOT EXISTS "hold_dodge_accelerated" (
-	"username"	CHAR(128),
+	"username"	TEXT UNIQUE,
 	"pc_score"	INTEGER,
 	"mobile_score"	INTEGER,
 	"pc_score_ip"	TEXT,
 	"mobile_score_ip"	TEXT,
 	"pc_score_time"	TEXT,
 	"mobile_score_time"	TEXT,
+	"pc_score_replay"	BLOB,
+	"mobile_score_replay"	BLOB,
 	PRIMARY KEY("username"),
-	FOREIGN KEY("username") REFERENCES "accounts"("username")
+	FOREIGN KEY("username") REFERENCES "accounts"
 );
 CREATE TABLE IF NOT EXISTS "hold_dodge" (
-	"username"	CHAR(128),
+	"username"	TEXT UNIQUE,
 	"pc_score"	INTEGER,
 	"mobile_score"	INTEGER,
 	"pc_score_ip"	TEXT,
 	"mobile_score_ip"	TEXT,
 	"pc_score_time"	TEXT,
 	"mobile_score_time"	TEXT,
+	"pc_score_replay"	BLOB,
+	"mobile_score_replay"	BLOB,
 	PRIMARY KEY("username"),
-	FOREIGN KEY("username") REFERENCES "accounts"("username")
+	FOREIGN KEY("username") REFERENCES "accounts"
 );
 CREATE TABLE IF NOT EXISTS "auth_tokens" (
 	"selector"	char(12),

@@ -26,11 +26,14 @@ const app = express();
 
 const routes = require(path.join(__dirname, "routes", "index"));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+	limit:'50mb',
+	//parameterLimit: 50000
+}));
 app.use(bodyParser.urlencoded({
 	limit: "50mb",
 	extended: true,
-	parameterLimit: 100000
+	//parameterLimit: 50000
 }));
 
 app.use(useragent.express());
