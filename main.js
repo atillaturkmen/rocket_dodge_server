@@ -26,9 +26,14 @@ const app = express();
 
 const routes = require(path.join(__dirname, "routes", "index"));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+	limit:'50mb',
+	//parameterLimit: 50000
+}));
 app.use(bodyParser.urlencoded({
-	extended: true
+	limit: "50mb",
+	extended: true,
+	//parameterLimit: 50000
 }));
 
 app.use(useragent.express());
@@ -56,7 +61,7 @@ if (argv.no_redis){
 app.use(session(session_parameter));
 
 app.set("view engine", "ejs");
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname ,'public')));
 
 const http_port = process.env.http_port;
 const http = require("http");

@@ -40,14 +40,20 @@
         let playerColor = "black"; // color of the player
         let playerHeadColor = "grey"; // color of the player's head
         let scoreTextColor = "black"; // color of the score text color
+        let playerHeight = 20;
+        let playerWidth = 20;
 
-        let mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); // true if device is mobile
+        let is_mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); // true if device is mobile
         let myGamePiece; // rocket that the player controls
         let missiles = []; // array which contains hostile missiles
         let missileInterval;
         let missileSpeed;
         let score = 0;
         let mouseX, mouseY;
+
+        //game states will consist of objects and coordinates
+        // [[score, ["player": [x, y, angle]], ["rocket": [x, y]], ["rocket": [x,y]], ...],...]
+        let game_states = [];
 
         //contains canvas and canvas related methods
         var myGameArea = {
@@ -89,7 +95,7 @@
                 this.context = this.canvas.getContext("2d"); // context field provides access to various useful canvas methods
                 document.body.appendChild(this.canvas); // insert canvas into html
 
-                myGamePiece = new player(20, 20, playerColor, playerHeadColor, 225, 225); // initialize player
+                myGamePiece = new player(playerWidth, playerHeight, playerColor, playerHeadColor, 225, 225); // initialize player
                 myGamePiece.update();
                 printScore(score);
             },
@@ -129,7 +135,7 @@
                 this.ongoing = false;
                 this.interval.pause();
                 this.scoreCounter.pause();
-                post_score(score, mobile);
+                post_score();
                 if (scores.length) {
                     //console.log(scores);
                     if ((scores.length < 5) || (score > scores[scores.length - 1].score)) {
@@ -155,7 +161,7 @@
                         }
                     }
                     let platform = "PC";
-                    if (mobile){
+                    if (is_mobile){
                         platform = "Mobile"
                     }
                     document.getElementById("gameover").children[0].innerHTML += `GAME OVER<br><br>Top ${platform} Scores:<br>`;
@@ -186,7 +192,7 @@
         }
 
         function player(width, height, color, headColor, x, y) {
-            if (mobile) {
+            if (is_mobile) {
                 this.width = width * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920) * 3);
                 this.height = height * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920) * 3);
             } else {
@@ -256,7 +262,7 @@
         }
 
         function missile(width, height, color, x, y, speed) {
-            if (mobile) {
+            if (is_mobile) {
                 this.width = width * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920) * 3);
                 this.height = height * ((myGameArea.canvas.width * myGameArea.canvas.height) / (1080 * 1920) * 3);
             } else {
@@ -306,6 +312,12 @@
         // this method updates the game area, is called every frame
         function updateGameArea() {
             myGameArea.frameNo++;
+
+            let current_objects = [[myGameArea.canvas.width, myGameArea.canvas.height], score, ["player", [myGamePiece.x, myGamePiece.y, myGamePiece.angle]]];
+            for (let i = 0; i < missiles.length; i++) {
+                current_objects.push(["rocket", [missiles[i].x, missiles[i].y]]);
+            }
+            game_states.push(current_objects);
             // check if player collides with one of missiles
             for (i = 0; i < missiles.length; i++) {
                 if (myGamePiece.crashWith(missiles[i])) {
@@ -357,9 +369,14 @@
             printScore(score);
         }
 
-        function post_score(score, is_mobile = false) {
+        function post_score() {
             let http = new XMLHttpRequest();
-            let scorePostData = { game_type: "touch_dodge", score: score, is_mobile: is_mobile };
+            let scorePostData = {
+                game_type: "touch_dodge",
+                score: score,
+                is_mobile: is_mobile,
+                game_states: game_states
+            };
             http.open("POST", "/score/update", true);
             http.setRequestHeader('Content-type', 'application/json');
             http.send(JSON.stringify(scorePostData));
